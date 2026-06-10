@@ -9,7 +9,10 @@ function hexToRgba(hex, opacityPercentage) {
 
 const getSettings = () => {
     const getValue = (id, defaultValue = '') => document.getElementById(id)?.value || defaultValue;
-    const getInt = (id, defaultValue = 0) => parseInt(document.getElementById(id)?.value) || defaultValue;
+    const getInt = (id, defaultValue = 0) => {
+        const val = parseInt(document.getElementById(id)?.value);
+        return isNaN(val) ? defaultValue : val;
+    };
 
     return {
         general: {
