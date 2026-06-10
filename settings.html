@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>StrixTools - Settings</title>
+    <link rel="stylesheet" href="styles/settings.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Overlay Settings</h2>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab('general')">General</button>
+            <button class="tab-btn" onclick="openTab('chat')">Chat</button>
+            <button class="tab-btn" onclick="openTab('events')">Events</button>
+        </div>
+
+        <div id="general" class="tab-content active">
+            <fieldset>
+                <legend>Twitch Connection</legend>
+                <div class="form-group">
+                    <label for="twitchChannel">Twitch Channel</label>
+                    <input type="text" id="twitchChannel" value="OwlishGeorge">
+                </div>
+                <div class="form-group">
+                    <label for="clientId">Client ID</label>
+                    <input type="text" id="clientId" value="doa3z7xa1o2xlugmpqmlczdg0p2pz0">
+                </div>
+                <div class="form-group">
+                    <label for="accessToken">Access Token</label>
+                    <input type="password" id="accessToken" placeholder="Paste your access token here">
+                    <p style="font-size: 11px; color: #888; margin-top: 5px;">
+                        Required scopes: moderator:read:followers, channel:read:subscriptions, bits:read
+                    </p>
+                </div>
+            </fieldset>
+        </div>
+
+        <div id="chat" class="tab-content">
+            <fieldset>
+                <legend>Pillbox & Layout</legend>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="maxMessages">Max Messages</label>
+                        <input type="number" id="maxMessages" value="15" min="1" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="messageLifetime">Fade Out (ms)</label>
+                        <input type="number" id="messageLifetime" value="20000" min="0" step="1000">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pillboxBgColor">Background Color</label>
+                        <input type="color" id="pillboxBgColor" value="#000000">
+                    </div>
+                    <div class="form-group">
+                        <label for="pillboxOpacity">Opacity (%)</label>
+                        <input type="range" id="pillboxOpacity" value="65" min="0" max="100">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pillboxRadius">Border Radius (px)</label>
+                        <input type="number" id="pillboxRadius" value="8" min="0" max="50">
+                    </div>
+                    <div class="form-group">
+                        <label for="messageGap">Gap (px)</label>
+                        <input type="number" id="messageGap" value="8" min="0" max="50">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pillboxPadding">Padding</label>
+                        <input type="text" id="pillboxPadding" value="8px 12px">
+                    </div>
+                    <div class="form-group">
+                        <label for="pillboxBorder">Border</label>
+                        <input type="text" id="pillboxBorder" value="none">
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Username Styling</legend>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label for="userFontFamily">Font Family</label>
+                        <input type="text" id="userFontFamily" value="'Helvetica Neue', Helvetica, Arial, sans-serif">
+                    </div>
+                    <div class="form-group">
+                        <label for="userFontSize">Size (px)</label>
+                        <input type="number" id="userFontSize" value="16">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userFontWeight">Weight</label>
+                        <select id="userFontWeight">
+                            <option value="400">400</option>
+                            <option value="600">600</option>
+                            <option value="800" selected>800</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="userFontStyle">Style</label>
+                        <select id="userFontStyle">
+                            <option value="normal" selected>Normal</option>
+                            <option value="italic">Italic</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userShadowColor">Shadow Color</label>
+                        <input type="color" id="userShadowColor" value="#000000">
+                    </div>
+                    <div class="form-group">
+                        <label for="userShadowBlur">Blur (px)</label>
+                        <input type="number" id="userShadowBlur" value="2">
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Message Text Styling</legend>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label for="msgFontFamily">Font Family</label>
+                        <input type="text" id="msgFontFamily" value="'Helvetica Neue', Helvetica, Arial, sans-serif">
+                    </div>
+                    <div class="form-group">
+                        <label for="msgFontSize">Size (px)</label>
+                        <input type="number" id="msgFontSize" value="16">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="msgColor">Color</label>
+                        <input type="color" id="msgColor" value="#f8f8f8">
+                    </div>
+                    <div class="form-group">
+                        <label for="msgFontWeight">Weight</label>
+                        <select id="msgFontWeight">
+                            <option value="400" selected>400</option>
+                            <option value="800">800</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="msgShadowColor">Shadow Color</label>
+                        <input type="color" id="msgShadowColor" value="#000000">
+                    </div>
+                    <div class="form-group">
+                        <label for="msgShadowBlur">Blur (px)</label>
+                        <input type="number" id="msgShadowBlur" value="2">
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+        <div id="events" class="tab-content">
+            <fieldset>
+                <legend>Typography</legend>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label for="eventFontFamily">Font Family</label>
+                        <input type="text" id="eventFontFamily" value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
+                    </div>
+                    <div class="form-group">
+                        <label for="eventFontSize">Size (px)</label>
+                        <input type="number" id="eventFontSize" value="24">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventFontWeight">Weight</label>
+                        <select id="eventFontWeight">
+                            <option value="400">400</option>
+                            <option value="800" selected>800</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventFontStyle">Style</label>
+                        <select id="eventFontStyle">
+                            <option value="normal" selected>Normal</option>
+                            <option value="italic">Italic</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Colors & Layout</legend>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventTextColor">Text Color</label>
+                        <input type="color" id="eventTextColor" value="#ffffff">
+                    </div>
+                    <div class="form-group">
+                        <label for="eventLabelColor">Label Color</label>
+                        <input type="color" id="eventLabelColor" value="#ff9900">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventLayout">Container Layout</label>
+                        <select id="eventLayout">
+                            <option value="vertical">Vertical</option>
+                            <option value="horizontal">Horizontal</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventSpacing">Gap (px)</label>
+                        <input type="number" id="eventSpacing" value="12">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventOrientation">Element Orientation</label>
+                        <select id="eventOrientation">
+                            <option value="horizontal">Horizontal (Label: Value)</option>
+                            <option value="stacked">Stacked (Label \n Value)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventLabelPosition">Label Position</label>
+                        <select id="eventLabelPosition">
+                            <option value="before">Before Value</option>
+                            <option value="after">After Value</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+        <fieldset>
+            <legend>Copy OBS URLs</legend>
+            <div class="form-row" style="margin-bottom: 10px;">
+                <button class="action-btn" onclick="generateOBSUrl('chat')" style="flex: 1; margin-top: 0; font-size: 12px; padding: 10px;">Chat Only</button>
+                <button class="action-btn" onclick="generateOBSUrl('follow')" style="flex: 1; margin-top: 0; font-size: 12px; padding: 10px;">Follow Only</button>
+            </div>
+            <div class="form-row">
+                <button class="action-btn" onclick="generateOBSUrl('sub')" style="flex: 1; margin-top: 0; font-size: 12px; padding: 10px;">Sub Only</button>
+                <button class="action-btn" onclick="generateOBSUrl('cheer')" style="flex: 1; margin-top: 0; font-size: 12px; padding: 10px;">Cheer Only</button>
+            </div>
+            <button class="action-btn" onclick="generateOBSUrl('all')" style="margin-top: 10px;">All-in-One Overlay</button>
+        </fieldset>
+
+        <div class="form-group" style="margin-top: 15px;">
+            <label for="obsUrlOutput">Your Custom OBS URL</label>
+            <input type="text" id="obsUrlOutput" readonly style="background-color: #000; color: #ff9900; border-color: #ff9900; text-align: center;" placeholder="URL will appear here...">
+        </div>
+    </div>
+
+    <div class="preview-container">
+        <h3 style="margin-top: 0; color: #FFF; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Live Preview</h3>
+        <div id="preview-box" style="display: flex; flex-direction: column; height: 100%;">
+            <div id="events-preview" style="margin-bottom: 20px;">
+                <div class="event-container" id="preview-follow">
+                    <span class="label">Latest Follower:</span> <span class="value">OwlishGeorge</span>
+                </div>
+                <div class="event-container" id="preview-sub">
+                    <span class="label">Latest Sub:</span> <span class="value">OwlishGeorge</span>
+                </div>
+                <div class="event-container" id="preview-cheer">
+                    <span class="label">Latest Cheer:</span> <span class="value">OwlishGeorge (1000 bits)</span>
+                </div>
+            </div>
+            <div id="chat-preview">
+                <div class="chat-message">
+                    <span class="username" style="color: #9146FF;">OwlishGeorge:</span>
+                    <span class="message-text">Welcome to the stream everyone!</span>
+                </div>
+                <div class="chat-message">
+                    <span class="username" style="color: #FF0000;">Strixvane:</span>
+                    <span class="message-text">This new overlay looks incredibly clean.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openTab(tabId) {
+            const contents = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-btn');
+            contents.forEach(c => c.classList.remove('active'));
+            buttons.forEach(b => b.classList.remove('active'));
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.add('active');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('onclick')?.includes(tabId)) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function hexToRgba(hex, opacityPercentage) {
+            if (!hex || hex.length < 7) return 'rgba(0,0,0,1)';
+            let r = parseInt(hex.slice(1, 3), 16),
+                g = parseInt(hex.slice(3, 5), 16),
+                b = parseInt(hex.slice(5, 7), 16),
+                a = opacityPercentage / 100;
+            return `rgba(${r}, ${g}, ${b}, ${a})`;
+        }
+
+        function getSettings() {
+            const getValue = (id, defaultValue = '') => document.getElementById(id)?.value || defaultValue;
+            const getInt = (id, defaultValue = 0) => parseInt(document.getElementById(id)?.value) || defaultValue;
+
+            return {
+                general: {
+                    twitchChannel: getValue('twitchChannel'),
+                    clientId: getValue('clientId'),
+                    accessToken: getValue('accessToken')
+                },
+                chat: {
+                    maxMessages: getInt('maxMessages', 15),
+                    messageLifetimeMs: getInt('messageLifetime', 20000),
+                    pillboxBgColor: getValue('pillboxBgColor', '#000000'),
+                    pillboxOpacity: getInt('pillboxOpacity', 65),
+                    pillboxRadius: getInt('pillboxRadius', 8),
+                    pillboxPadding: getValue('pillboxPadding', '8px 12px'),
+                    pillboxBorder: getValue('pillboxBorder', 'none'),
+                    messageGap: getInt('messageGap', 8),
+                    userFontFamily: getValue('userFontFamily', "'Helvetica Neue', Helvetica, Arial, sans-serif"),
+                    userFontSize: getInt('userFontSize', 16),
+                    userFontWeight: getValue('userFontWeight', '800'),
+                    userFontStyle: getValue('userFontStyle', 'normal'),
+                    userShadowColor: getValue('userShadowColor', '#000000'),
+                    userShadowBlur: getInt('userShadowBlur', 2),
+                    msgFontFamily: getValue('msgFontFamily', "'Helvetica Neue', Helvetica, Arial, sans-serif"),
+                    msgColor: getValue('msgColor', '#f8f8f8'),
+                    msgFontSize: getInt('msgFontSize', 16),
+                    msgFontWeight: getValue('msgFontWeight', '400'),
+                    msgShadowColor: getValue('msgShadowColor', '#000000'),
+                    msgShadowBlur: getInt('msgShadowBlur', 2)
+                },
+                events: {
+                    fontFamily: getValue('eventFontFamily', "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"),
+                    fontSize: getInt('eventFontSize', 24),
+                    fontWeight: getValue('eventFontWeight', '800'),
+                    fontStyle: getValue('eventFontStyle', 'normal'),
+                    textColor: getValue('eventTextColor', '#ffffff'),
+                    labelColor: getValue('eventLabelColor', '#ff9900'),
+                    layout: getValue('eventLayout', 'vertical'),
+                    spacing: getInt('eventSpacing', 12),
+                    orientation: getValue('eventOrientation', 'horizontal'),
+                    labelPosition: getValue('eventLabelPosition', 'before')
+                }
+                };
+                }
+
+                function updatePreview() {
+                const settings = getSettings();
+
+                const eventsPreview = document.getElementById('events-preview');
+                if (eventsPreview) {
+                eventsPreview.style.fontFamily = settings.events.fontFamily;
+                eventsPreview.style.fontSize = settings.events.fontSize + 'px';
+                eventsPreview.style.fontWeight = settings.events.fontWeight;
+                eventsPreview.style.fontStyle = settings.events.fontStyle;
+                eventsPreview.style.color = settings.events.textColor;
+                eventsPreview.querySelectorAll('.label').forEach(l => l.style.color = settings.events.labelColor);
+
+                if (settings.events.layout === 'horizontal') {
+                    eventsPreview.style.display = 'flex';
+                    eventsPreview.style.gap = settings.events.spacing + 'px';
+                } else {
+                    eventsPreview.style.display = 'block';
+                }
+
+                eventsPreview.querySelectorAll('.event-container').forEach(c => {
+                    c.style.margin = settings.events.layout === 'vertical' ? `${settings.events.spacing}px 0` : '0';
+
+                    if (settings.events.orientation === 'stacked') {
+                        c.style.display = 'flex';
+                        c.style.flexDirection = 'column';
+                        c.style.alignItems = 'flex-start';
+                    } else {
+                        c.style.display = 'flex';
+                        c.style.flexDirection = 'row';
+                        c.style.alignItems = 'center';
+                        c.style.gap = '8px';
+                    }
+
+                    if (settings.events.labelPosition === 'after') {
+                        c.style.flexDirection = settings.events.orientation === 'stacked' ? 'column-reverse' : 'row-reverse';
+                    }
+                });
+                }
+
+        const chatPreview = document.getElementById('chat-preview');
+        if (chatPreview) {
+            chatPreview.style.display = 'flex';
+            chatPreview.style.flexDirection = 'column';
+            chatPreview.style.justifyContent = 'flex-end';
+            chatPreview.style.flexGrow = '1';
+            chatPreview.style.gap = settings.chat.messageGap + 'px';
+            const bgColorWithOpacity = hexToRgba(settings.chat.pillboxBgColor, settings.chat.pillboxOpacity);
+                chatPreview.querySelectorAll('.chat-message').forEach(msg => {
+                    msg.style.backgroundColor = bgColorWithOpacity;
+                    msg.style.borderRadius = settings.chat.pillboxRadius + 'px';
+                    msg.style.padding = settings.chat.pillboxPadding;
+                    msg.style.border = settings.chat.pillboxBorder;
+                });
+                chatPreview.querySelectorAll('.username').forEach(u => {
+                    u.style.fontFamily = settings.chat.userFontFamily;
+                    u.style.fontSize = settings.chat.userFontSize + 'px';
+                    u.style.fontWeight = settings.chat.userFontWeight;
+                    u.style.fontStyle = settings.chat.userFontStyle;
+                    u.style.textShadow = `1px 1px ${settings.chat.userShadowBlur}px ${settings.chat.userShadowColor}`;
+                });
+                chatPreview.querySelectorAll('.message-text').forEach(t => {
+                    t.style.fontFamily = settings.chat.msgFontFamily;
+                    t.style.color = settings.chat.msgColor;
+                    t.style.fontSize = settings.chat.msgFontSize + 'px';
+                    t.style.fontWeight = settings.chat.msgFontWeight;
+                    t.style.textShadow = `1px 1px ${settings.chat.msgShadowBlur}px ${settings.chat.msgShadowColor}`;
+                });
+            }
+        }
+
+        function generateOBSUrl(type = 'all') {
+            try {
+                const settings = getSettings();
+                const jsonString = JSON.stringify(settings);
+                // Standard UTF-8 safe base64 encoding
+                const encodedSettings = btoa(unescape(encodeURIComponent(jsonString)));
+
+                const currentPath = window.location.href;
+                const targetPath = currentPath.replace('settings.html', 'index.html');
+                let finalUrl = `${targetPath}?cfg=${encodedSettings}`;
+                
+                if (type !== 'all') {
+                    finalUrl += `&type=${type}`;
+                }
+
+                const outputNode = document.getElementById('obsUrlOutput');
+                if (outputNode) {
+                    outputNode.value = finalUrl;
+                    outputNode.select();
+                }
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(finalUrl).then(() => {
+                        const btn = document.querySelector('.action-btn');
+                        const originalText = btn.innerText;
+                        btn.innerText = "Copied to Clipboard!";
+                        btn.style.backgroundColor = "#00FF00";
+                        btn.style.color = "#000";
+                        setTimeout(() => {
+                            btn.innerText = originalText;
+                            btn.style.backgroundColor = "#ff9900";
+                            btn.style.color = "#FFF";
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Failed to copy', err);
+                    });
+                }
+            } catch (e) {
+                console.error("URL Generation Error:", e);
+                alert("Error generating URL. Check console for details.");
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input, select').forEach(el => {
+                el.addEventListener('input', updatePreview);
+            });
+            updatePreview();
+        });
+    </script>
+</body>
+</html>

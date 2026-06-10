@@ -1,0 +1,60 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: transparent;
+    overflow: hidden;
+}
+
+#overlay-root {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Event Styles */
+:root {
+    --event-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --event-font-size: 24px;
+    --event-font-weight: 800;
+    --event-font-style: normal;
+    --event-text-decoration: none;
+    --event-kerning: 0px;
+    --event-text-color: #ffffff;
+    --event-label-color: #ff9900;
+    --event-text-shadow: 2px 2px 4px #000000;
+
+    --chat-pillbox-bg: rgba(0, 0, 0, 0.65);
+    --chat-pillbox-radius: 8px;
+    --chat-pillbox-padding: 8px 12px;
+    --chat-pillbox-border: none;
+    --chat-gap: 8px;
+}
+
+#events-container {
+    font-family: var(--event-font-family);
+    font-size: var(--event-font-size);
+    font-weight: var(--event-font-weight);
+    font-style: var(--event-font-style);
+    text-decoration: var(--event-text-decoration);
+    letter-spacing: var(--event-kerning);
+    color: var(--event-text-color);
+    text-shadow: var(--event-text-shadow);
+    margin-bottom: 20px;
+}
+
+.event-container .label {
+    color: var(--event-label-color);
+    margin-right: 5px;
+}
+
+/* Chat Styles */
+#chat-container {
+    flex-grow: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
