@@ -1,6 +1,3 @@
-import tmi from 'https://esm.sh/tmi.js';
-import { parseEmotes } from 'https://esm.sh/emotettv';
-
 export class ChatModule {
     constructor(config) {
         this.config = config;
@@ -10,19 +7,23 @@ export class ChatModule {
 
     init(containerId) {
         this.container = document.getElementById(containerId);
+        if (!this.container) return;
         this.applyStyles();
         
-        this.client = new tmi.Client({
-            channels: [this.config.twitchChannel]
-        });
+        if (this.config.twitchChannel) {
+            this.client = new tmi.Client({
+                channels: [this.config.twitchChannel]
+            });
 
-        this.client.connect().catch(console.error);
-        this.client.on('message', this.handleMessage.bind(this));
+            this.client.connect().catch(console.error);
+            this.client.on('message', this.handleMessage.bind(this));
+        }
     }
 
     applyStyles() {
         const settings = this.config;
         const hexToRgba = (hex, opacityPercentage) => {
+            if (!hex || hex.length < 7) return 'rgba(0,0,0,1)';
             let r = parseInt(hex.slice(1, 3), 16),
                 g = parseInt(hex.slice(3, 5), 16),
                 b = parseInt(hex.slice(5, 7), 16),
@@ -32,6 +33,10 @@ export class ChatModule {
 
         const bgColorWithOpacity = hexToRgba(settings.pillboxBgColor, settings.pillboxOpacity);
         const dynamicStyles = document.createElement('style');
+
+        const border = settings.borderWidth > 0 
+            ? `${settings.borderWidth}px ${settings.borderStyle} ${settings.borderColor}` 
+            : 'none';
 
         dynamicStyles.innerHTML = `
             #chat-container { 
@@ -43,7 +48,7 @@ export class ChatModule {
                 background-color: ${bgColorWithOpacity};
                 border-radius: ${settings.pillboxRadius}px;
                 padding: ${settings.pillboxPadding};
-                border: ${settings.pillboxBorder};
+                border: ${border};
                 margin-bottom: 0;
             }
             .username {
