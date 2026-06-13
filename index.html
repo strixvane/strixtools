@@ -40,14 +40,17 @@
 
             init(containerId) {
                 this.container = document.getElementById(containerId);
+                if (!this.container) return;
                 this.applyStyles();
                 
-                this.client = new tmi.Client({
-                    channels: [this.config.twitchChannel]
-                });
+                if (this.config.twitchChannel) {
+                    this.client = new tmi.Client({
+                        channels: [this.config.twitchChannel]
+                    });
 
-                this.client.connect().catch(console.error);
-                this.client.on('message', this.handleMessage.bind(this));
+                    this.client.connect().catch(console.error);
+                    this.client.on('message', this.handleMessage.bind(this));
+                }
             }
 
             applyStyles() {
@@ -64,6 +67,10 @@
                 const bgColorWithOpacity = hexToRgba(settings.pillboxBgColor, settings.pillboxOpacity);
                 const dynamicStyles = document.createElement('style');
 
+                const border = settings.borderWidth > 0 
+                    ? `${settings.borderWidth}px ${settings.borderStyle} ${settings.borderColor}` 
+                    : 'none';
+
                 dynamicStyles.innerHTML = `
                     #chat-container { 
                         display: flex;
@@ -74,7 +81,7 @@
                         background-color: ${bgColorWithOpacity};
                         border-radius: ${settings.pillboxRadius}px;
                         padding: ${settings.pillboxPadding};
-                        border: ${settings.pillboxBorder};
+                        border: ${border};
                         margin-bottom: 0;
                     }
                     .username {
@@ -142,11 +149,13 @@
         }
 
         const init = async () => {
+            console.log("StrixTools Overlay Initializing...");
             let settings = window.DEFAULT_SETTINGS || {};
             const urlParams = new URLSearchParams(window.location.search);
             const encodedConfig = urlParams.get('cfg');
 
             if (encodedConfig) {
+                console.log("Found configuration in URL, decoding...");
                 try {
                     const decodedString = decodeURIComponent(atob(encodedConfig));
                     const customSettings = JSON.parse(decodedString);
@@ -155,21 +164,22 @@
                         chat: { ...settings.chat, ...customSettings.chat },
                         events: { ...settings.events, ...customSettings.events }
                     };
+                    console.log("Configuration decoded successfully.");
                 } catch (error) {
                     console.error("Failed to parse settings from URL, falling back to defaults.", error);
                 }
             }
 
+            const type = urlParams.get('type');
             const twitchClient = new window.TwitchClient(settings.general);
 
-            if (!urlParams.get('type') || urlParams.get('type') === 'chat') {
+            if (!type || type === 'chat') {
                 const chatModule = new ChatModule({ ...settings.chat, twitchChannel: settings.general.twitchChannel });
                 chatModule.init('chat-container');
             } else {
                 document.getElementById('chat-container').style.display = 'none';
             }
 
-            const type = urlParams.get('type');
             const isEvent = ['follow', 'sub', 'cheer'].includes(type);
             const showEvents = !type || isEvent;
 
@@ -185,14 +195,11 @@
                 }
 
                 const eventsModule = new window.EventsModule(settings.events, twitchClient);
-                try {
-                    await eventsModule.init();
-                } catch (err) {
-                    console.error("Events module failed to initialize:", err);
-                }
+                await eventsModule.init();
             } else {
                 document.getElementById('events-container').style.display = 'none';
             }
+            console.log("StrixTools Overlay Initialization Complete.");
         };
 
         window.onload = init;

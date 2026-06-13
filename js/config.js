@@ -1,7 +1,7 @@
 const DEFAULT_SETTINGS = {
     general: {
-        twitchChannel: 'OwlishGeorge',
-        clientId: 'doa3z7xa1o2xlugmpqmlczdg0p2pz0',
+        twitchChannel: '',
+        clientId: '',
         accessToken: ''
     },
     chat: {
@@ -11,36 +11,39 @@ const DEFAULT_SETTINGS = {
         pillboxOpacity: 65,
         pillboxRadius: 8,
         pillboxPadding: '8px 12px',
-        pillboxBorder: 'none',
         messageGap: 8,
-        userFontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+        userFontFamily: "system-ui, -apple-system, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
         userFontSize: 16,
         userFontWeight: 800,
         userFontStyle: 'normal',
         userTextTransform: 'none',
         userLetterSpacing: 0,
         userShadowColor: '#000000',
-        userShadowBlur: 2,
+        userShadowBlur: 3,
         userShadowOffsetX: 1,
         userShadowOffsetY: 1,
-        msgFontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+        msgFontFamily: "system-ui, -apple-system, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
         msgColor: '#f8f8f8',
         msgFontSize: 16,
-        msgFontWeight: 400,
+        msgFontWeight: 500,
         msgFontStyle: 'normal',
         msgLetterSpacing: 0,
         msgShadowColor: '#000000',
         msgShadowBlur: 2,
         msgShadowOffsetX: 1,
-        msgShadowOffsetY: 1
+        msgShadowOffsetY: 1,
+        borderWidth: 0,
+        borderStyle: 'solid',
+        borderColor: '#ffffff'
     },
     events: {
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-        fontSize: 24,
+        fontFamily: "system-ui, -apple-system, 'Montserrat', 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+        fontSize: 20,
         fontWeight: 800,
         fontStyle: 'normal',
         textDecoration: 'none',
-        kerning: 0,
+        textTransform: 'uppercase',
+        kerning: 1,
         textColor: '#ffffff',
         labelColor: '#ff9900',
         shadowColor: '#000000',
@@ -49,9 +52,17 @@ const DEFAULT_SETTINGS = {
         shadowBlur: 4,
         layout: 'vertical',
         spacing: 12,
-        padding: 0,
+        padding: '5px 10px',
         orientation: 'horizontal',
-        labelPosition: 'before'
+        labelPosition: 'before',
+        bgColor: 'transparent',
+        bgOpacity: 0,
+        borderRadius: 0,
+        borderWidth: 0,
+        borderStyle: 'solid',
+        borderColor: '#ffffff',
+        highlightColor: '#00FF00',
+        highlightDurationMs: 2000
     }
 };
 
