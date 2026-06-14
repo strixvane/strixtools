@@ -1,4 +1,4 @@
-export class ChatModule {
+class ChatModule {
     constructor(config) {
         this.config = config;
         this.container = null;
@@ -10,8 +10,8 @@ export class ChatModule {
         if (!this.container) return;
         this.applyStyles();
         
-        if (this.config.twitchChannel) {
-            this.client = new tmi.Client({
+        if (this.config.twitchChannel && window.tmi) {
+            this.client = new window.tmi.Client({
                 channels: [this.config.twitchChannel]
             });
 
@@ -33,6 +33,7 @@ export class ChatModule {
 
         const bgColorWithOpacity = hexToRgba(settings.pillboxBgColor, settings.pillboxOpacity);
         const dynamicStyles = document.createElement('style');
+        dynamicStyles.id = 'chat-dynamic-styles';
 
         const border = settings.borderWidth > 0 
             ? `${settings.borderWidth}px ${settings.borderStyle} ${settings.borderColor}` 
@@ -58,7 +59,7 @@ export class ChatModule {
                 font-style: ${settings.userFontStyle};
                 text-transform: ${settings.userTextTransform};
                 letter-spacing: ${settings.userLetterSpacing}px;
-                text-shadow: 1px 1px ${settings.userShadowBlur}px ${settings.userShadowColor};
+                text-shadow: ${settings.userShadowOffsetX || 1}px ${settings.userShadowOffsetY || 1}px ${settings.userShadowBlur}px ${settings.userShadowColor};
             }
             .message-text {
                 font-family: ${settings.msgFontFamily};
@@ -67,7 +68,7 @@ export class ChatModule {
                 font-weight: ${settings.msgFontWeight};
                 font-style: ${settings.msgFontStyle};
                 letter-spacing: ${settings.msgLetterSpacing}px;
-                text-shadow: 1px 1px ${settings.msgShadowBlur}px ${settings.msgShadowColor};
+                text-shadow: ${settings.msgShadowOffsetX || 1}px ${settings.msgShadowOffsetY || 1}px ${settings.msgShadowBlur}px ${settings.msgShadowColor};
             }
             .fade-out {
                 animation: fadeOut 0.5s forwards;
@@ -77,6 +78,9 @@ export class ChatModule {
                 to { opacity: 0; }
             }
         `;
+        
+        const existing = document.getElementById('chat-dynamic-styles');
+        if (existing) existing.remove();
         document.head.appendChild(dynamicStyles);
     }
 
@@ -87,14 +91,21 @@ export class ChatModule {
         const userColor = tags['color'] || '#9146FF';
         const displayName = tags['display-name'] || tags['username'];
 
-        const parsedEmotes = await parseEmotes(message, tags.emotes, {
-            channelId: tags['room-id']
-        });
+        let contentHTML = message;
+        if (window.parseEmotes) {
+            const parsedEmotes = await window.parseEmotes(message, tags.emotes, {
+                channelId: tags['room-id']
+            });
+            contentHTML = parsedEmotes.toHTML();
+        }
 
         messageElement.innerHTML = `
-            <span class="username" style="color: ${userColor};">${displayName}:</span>
-            <span class="message-text">${parsedEmotes.toHTML()}</span>
+            <span class="username">${displayName}:</span>
+            <span class="message-text">${contentHTML}</span>
         `;
+
+        const usernameElement = messageElement.querySelector('.username');
+        usernameElement.style.color = userColor;
 
         this.container.appendChild(messageElement);
 
@@ -114,3 +125,5 @@ export class ChatModule {
         }
     }
 }
+
+window.ChatModule = ChatModule;

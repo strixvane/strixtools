@@ -1,6 +1,6 @@
 # StrixTools Overlay
 
-![StrixTools Overlay Preview](assets/preview_screenshot.png)
+![StrixTools Overlay Preview](assets/preview_screenshot.webp)
 
 StrixTools is a lightweight, high-performance, and highly customizable Twitch overlay suite designed for OBS and other streaming software. Built with modern web technologies, it provides a seamless chat experience and real-time event tracking without the need for complex installations or backend servers.
 
@@ -15,22 +15,26 @@ StrixTools is a lightweight, high-performance, and highly customizable Twitch ov
 
 ## Setup Instructions
 
-### 1. Configure the Overlay
-1. Open `settings.html` in your web browser.
-2. **General Tab:** Enter your **Twitch Channel** name.
-3. **Authentication:** Provide a **Client ID** and **Access Token**. (See below for instructions on how to generate these).
-4. **Customization:** Use the **Chat** and **Events** tabs to style the overlay. Your changes will appear instantly in the **Live Preview** pane.
-5. **Testing:** Click "Test Chat" or "Test Event" in the preview pane to see your animations and styles in action.
-6. **Generate URL:** Scroll down and click **All-in-One Overlay** (or a specific component button). The custom URL will be generated and copied to your clipboard.
+### 1. Initial Configuration (OBS Custom Dock)
+The best way to use StrixTools is by adding the settings page directly into OBS. This allows you to see changes live on your stream as you make them.
 
-### 2. Add to OBS
-1. In OBS, add a new **Browser Source**.
-2. **URL:** Paste the generated URL from your clipboard.
-3. **Dimensions:** Set the width and height to your preference.
-4. **Optimization:** Check "Shutdown source when not visible" for best performance.
-5. **Update:** Whenever you change settings in `settings.html`, generate a new URL, update the source in OBS, and refresh the cache.
+1. In OBS, go to **View** -> **Docks** -> **Custom Browser Docks...**
+2. **Dock Name:** `StrixTools Settings`
+3. **URL:** (Point this to the `settings.html` file on your computer, e.g., `C:\Users\Name\strixtools\settings.html`)
+4. Click **Apply**. A new window will appear in OBS. Drag it wherever you like in your layout.
+5. **Twitch Connection:** In the new dock, enter your **Twitch Channel**, **Client ID**, and **Access Token**.
 
-## How to Get Your Twitch Access Token
+### 2. Add the Overlay to OBS
+1. In your StrixTools Settings dock, scroll down and click **All-in-One Overlay**. The custom URL will be copied to your clipboard.
+2. In OBS, add a new **Browser Source** to your scene.
+3. **URL:** Paste the URL from your clipboard.
+4. **Dimensions:** Set your preferred width and height.
+5. **Live Updates:** Now, whenever you change a color or font in the **StrixTools Settings dock**, the overlay in your scene will update **instantly**! You no longer need to generate new URLs for every change.
+
+> [!TIP]
+> **Cleaner URLs:** We've optimized the generated URLs to be much shorter and easier to manage. They now only store the settings you've actually changed from the defaults.
+
+### 3. How to Get Your Twitch Access Token
 
 To track live events and read chat, the overlay needs a secure connection to your Twitch channel.
 

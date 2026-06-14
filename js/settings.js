@@ -1,3 +1,4 @@
+
 function hexToRgba(hex, opacityPercentage) {
     if (!hex || hex === 'transparent') return 'transparent';
     if (hex.length < 7) return 'rgba(0,0,0,1)';
@@ -19,65 +20,83 @@ const getSettings = () => {
         return isNaN(val) ? defaultValue : val;
     };
 
+    const defaults = window.DEFAULT_SETTINGS || { general: {}, chat: {}, events: {} };
+
     return {
         general: {
-            twitchChannel: getValue('twitchChannel'),
-            clientId: getValue('clientId'),
-            accessToken: getValue('accessToken')
+            twitchChannel: getValue('twitchChannel', defaults.general.twitchChannel),
+            clientId: getValue('clientId', defaults.general.clientId),
+            accessToken: getValue('accessToken', defaults.general.accessToken)
         },
         chat: {
-            maxMessages: getInt('maxMessages', 15),
-            messageLifetimeMs: getInt('messageLifetime', 20000),
-            pillboxBgColor: getValue('pillboxBgColor', '#000000'),
-            pillboxOpacity: getInt('pillboxOpacity', 65),
-            pillboxRadius: getInt('pillboxRadius', 8),
-            pillboxPadding: getValue('pillboxPadding', '8px 12px'),
-            messageGap: getInt('messageGap', 8),
-            userFontFamily: getValue('userFontFamily', "system-ui, -apple-system, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"),
-            userFontSize: getInt('userFontSize', 16),
-            userFontWeight: getValue('userFontWeight', '800'),
-            userFontStyle: getValue('userFontStyle', 'normal'),
-            userTextTransform: getValue('userTextTransform', 'none'),
-            userShadowColor: getValue('userShadowColor', '#000000'),
-            userShadowBlur: getInt('userShadowBlur', 3),
-            msgFontFamily: getValue('msgFontFamily', "system-ui, -apple-system, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"),
-            msgColor: getValue('msgColor', '#f8f8f8'),
-            msgFontSize: getInt('msgFontSize', 16),
-            msgFontWeight: getValue('msgFontWeight', '500'),
-            msgShadowColor: getValue('msgShadowColor', '#000000'),
-            msgShadowBlur: getInt('msgShadowBlur', 2),
-            borderWidth: getInt('chatBorderWidth', 0),
-            borderStyle: getValue('chatBorderStyle', 'solid'),
-            borderColor: getValue('chatBorderColor', '#ffffff')
+            maxMessages: getInt('maxMessages', defaults.chat.maxMessages),
+            messageLifetimeMs: getInt('messageLifetime', defaults.chat.messageLifetimeMs),
+            pillboxBgColor: getValue('pillboxBgColor', defaults.chat.pillboxBgColor),
+            pillboxOpacity: getInt('pillboxOpacity', defaults.chat.pillboxOpacity),
+            pillboxRadius: getInt('pillboxRadius', defaults.chat.pillboxRadius),
+            pillboxPadding: getValue('pillboxPadding', defaults.chat.pillboxPadding),
+            messageGap: getInt('messageGap', defaults.chat.messageGap),
+            userFontFamily: getValue('userFontFamily', defaults.chat.userFontFamily),
+            userFontSize: getInt('userFontSize', defaults.chat.userFontSize),
+            userFontWeight: getValue('userFontWeight', defaults.chat.userFontWeight),
+            userFontStyle: getValue('userFontStyle', defaults.chat.userFontStyle),
+            userTextTransform: getValue('userTextTransform', defaults.chat.userTextTransform),
+            userLetterSpacing: getInt('userLetterSpacing', defaults.chat.userLetterSpacing),
+            userShadowColor: getValue('userShadowColor', defaults.chat.userShadowColor),
+            userShadowBlur: getInt('userShadowBlur', defaults.chat.userShadowBlur),
+            userShadowOffsetX: getInt('userShadowOffsetX', defaults.chat.userShadowOffsetX),
+            userShadowOffsetY: getInt('userShadowOffsetY', defaults.chat.userShadowOffsetY),
+            msgFontFamily: getValue('msgFontFamily', defaults.chat.msgFontFamily),
+            msgColor: getValue('msgColor', defaults.chat.msgColor),
+            msgFontSize: getInt('msgFontSize', defaults.chat.msgFontSize),
+            msgFontWeight: getValue('msgFontWeight', defaults.chat.msgFontWeight),
+            msgFontStyle: getValue('msgFontStyle', defaults.chat.msgFontStyle),
+            msgLetterSpacing: getInt('msgLetterSpacing', defaults.chat.msgLetterSpacing),
+            msgShadowColor: getValue('msgShadowColor', defaults.chat.msgShadowColor),
+            msgShadowBlur: getInt('msgShadowBlur', defaults.chat.msgShadowBlur),
+            msgShadowOffsetX: getInt('msgShadowOffsetX', defaults.chat.msgShadowOffsetX),
+            msgShadowOffsetY: getInt('msgShadowOffsetY', defaults.chat.msgShadowOffsetY),
+            borderWidth: getInt('chatBorderWidth', defaults.chat.borderWidth),
+            borderStyle: getValue('chatBorderStyle', defaults.chat.borderStyle),
+            borderColor: getValue('chatBorderColor', defaults.chat.borderColor)
         },
         events: {
-            fontFamily: getValue('eventFontFamily', "system-ui, -apple-system, 'Montserrat', 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"),
-            fontSize: getInt('eventFontSize', 20),
-            fontWeight: getValue('eventFontWeight', '800'),
-            fontStyle: getValue('eventFontStyle', 'normal'),
-            textDecoration: getValue('eventTextDecoration', 'none'),
-            textTransform: getValue('eventTextTransform', 'uppercase'),
-            textColor: getValue('eventTextColor', '#ffffff'),
-            labelColor: getValue('eventLabelColor', '#ff9900'),
-            layout: getValue('eventLayout', 'vertical'),
-            spacing: getInt('eventSpacing', 12),
-            orientation: getValue('eventOrientation', 'horizontal'),
-            labelPosition: getValue('eventLabelPosition', 'before'),
-            bgColor: getValue('eventBgColor', 'transparent'),
-            bgOpacity: getInt('eventBgOpacity', 0),
-            borderRadius: getInt('eventBorderRadius', 0),
-            borderWidth: getInt('eventBorderWidth', 0),
-            borderStyle: getValue('eventBorderStyle', 'solid'),
-            borderColor: getValue('eventBorderColor', '#ffffff'),
-            highlightColor: getValue('eventHighlightColor', '#00FF00'),
-            highlightDurationMs: getInt('eventHighlightDuration', 2000)
+            fontFamily: getValue('eventFontFamily', defaults.events.fontFamily),
+            fontSize: getInt('eventFontSize', defaults.events.fontSize),
+            fontWeight: getValue('eventFontWeight', defaults.events.fontWeight),
+            fontStyle: getValue('eventFontStyle', defaults.events.fontStyle),
+            textDecoration: getValue('eventTextDecoration', defaults.events.textDecoration),
+            textTransform: getValue('eventTextTransform', defaults.events.textTransform),
+            kerning: getInt('eventKerning', defaults.events.kerning),
+            textColor: getValue('eventTextColor', defaults.events.textColor),
+            labelColor: getValue('eventLabelColor', defaults.events.labelColor),
+            shadowColor: getValue('eventShadowColor', defaults.events.shadowColor),
+            shadowX: getInt('eventShadowX', defaults.events.shadowX),
+            shadowY: getInt('eventShadowY', defaults.events.shadowY),
+            shadowBlur: getInt('eventShadowBlur', defaults.events.shadowBlur),
+            layout: getValue('eventLayout', defaults.events.layout),
+            spacing: getInt('eventSpacing', defaults.events.spacing),
+            padding: getValue('eventPadding', defaults.events.padding),
+            orientation: getValue('eventOrientation', defaults.events.orientation),
+            labelPosition: getValue('eventLabelPosition', defaults.events.labelPosition),
+            bgColor: getValue('eventBgColor', defaults.events.bgColor),
+            bgOpacity: getInt('eventBgOpacity', defaults.events.bgOpacity),
+            borderRadius: getInt('eventBorderRadius', defaults.events.borderRadius),
+            borderWidth: getInt('eventBorderWidth', defaults.events.borderWidth),
+            borderStyle: getValue('eventBorderStyle', defaults.events.borderStyle),
+            borderColor: getValue('eventBorderColor', defaults.events.borderColor),
+            highlightColor: getValue('eventHighlightColor', defaults.events.highlightColor),
+            highlightDurationMs: getInt('eventHighlightDuration', defaults.events.highlightDurationMs)
         }
     };
 };
 
+const syncChannel = new BroadcastChannel('strixtools_sync');
+
 const saveToLocalStorage = () => {
     const settings = getSettings();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    syncChannel.postMessage({ type: 'update', settings });
 };
 
 const loadFromLocalStorage = () => {
@@ -86,61 +105,82 @@ const loadFromLocalStorage = () => {
 
     try {
         const settings = JSON.parse(saved);
-        
+        const defaults = window.DEFAULT_SETTINGS;
+
+        const setVal = (id, val, defaultVal) => {
+            const el = document.getElementById(id);
+            if (el) el.value = (val !== undefined) ? val : defaultVal;
+        };
+
         if (settings.general) {
-            document.getElementById('twitchChannel').value = settings.general.twitchChannel || '';
-            document.getElementById('clientId').value = settings.general.clientId || '';
-            document.getElementById('accessToken').value = settings.general.accessToken || '';
+            setVal('twitchChannel', settings.general.twitchChannel, defaults.general.twitchChannel);
+            setVal('clientId', settings.general.clientId, defaults.general.clientId);
+            setVal('accessToken', settings.general.accessToken, defaults.general.accessToken);
         }
 
         if (settings.chat) {
             const c = settings.chat;
-            document.getElementById('maxMessages').value = c.maxMessages;
-            document.getElementById('messageLifetime').value = c.messageLifetimeMs;
-            document.getElementById('pillboxBgColor').value = c.pillboxBgColor;
-            document.getElementById('pillboxOpacity').value = c.pillboxOpacity;
-            document.getElementById('pillboxRadius').value = c.pillboxRadius;
-            document.getElementById('pillboxPadding').value = c.pillboxPadding;
-            document.getElementById('messageGap').value = c.messageGap;
-            document.getElementById('userFontFamily').value = c.userFontFamily;
-            document.getElementById('userFontSize').value = c.userFontSize;
-            document.getElementById('userFontWeight').value = c.userFontWeight;
-            document.getElementById('userFontStyle').value = c.userFontStyle;
-            document.getElementById('userTextTransform').value = c.userTextTransform || 'none';
-            document.getElementById('userShadowColor').value = c.userShadowColor;
-            document.getElementById('userShadowBlur').value = c.userShadowBlur;
-            document.getElementById('msgFontFamily').value = c.msgFontFamily;
-            document.getElementById('msgColor').value = c.msgColor;
-            document.getElementById('msgFontSize').value = c.msgFontSize;
-            document.getElementById('msgFontWeight').value = c.msgFontWeight;
-            document.getElementById('msgShadowColor').value = c.msgShadowColor;
-            document.getElementById('msgShadowBlur').value = c.msgShadowBlur;
-            document.getElementById('chatBorderWidth').value = c.borderWidth || 0;
-            document.getElementById('chatBorderStyle').value = c.borderStyle || 'solid';
-            document.getElementById('chatBorderColor').value = c.borderColor || '#ffffff';
+            const d = defaults.chat;
+            setVal('maxMessages', c.maxMessages, d.maxMessages);
+            setVal('messageLifetime', c.messageLifetimeMs, d.messageLifetimeMs);
+            setVal('pillboxBgColor', c.pillboxBgColor, d.pillboxBgColor);
+            setVal('pillboxOpacity', c.pillboxOpacity, d.pillboxOpacity);
+            setVal('pillboxRadius', c.pillboxRadius, d.pillboxRadius);
+            setVal('pillboxPadding', c.pillboxPadding, d.pillboxPadding);
+            setVal('messageGap', c.messageGap, d.messageGap);
+            setVal('userFontFamily', c.userFontFamily, d.userFontFamily);
+            setVal('userFontSize', c.userFontSize, d.userFontSize);
+            setVal('userFontWeight', c.userFontWeight, d.userFontWeight);
+            setVal('userFontStyle', c.userFontStyle, d.userFontStyle);
+            setVal('userTextTransform', c.userTextTransform, d.userTextTransform);
+            setVal('userLetterSpacing', c.userLetterSpacing, d.userLetterSpacing);
+            setVal('userShadowColor', c.userShadowColor, d.userShadowColor);
+            setVal('userShadowBlur', c.userShadowBlur, d.userShadowBlur);
+            setVal('userShadowOffsetX', c.userShadowOffsetX, d.userShadowOffsetX);
+            setVal('userShadowOffsetY', c.userShadowOffsetY, d.userShadowOffsetY);
+            setVal('msgFontFamily', c.msgFontFamily, d.msgFontFamily);
+            setVal('msgColor', c.msgColor, d.msgColor);
+            setVal('msgFontSize', c.msgFontSize, d.msgFontSize);
+            setVal('msgFontWeight', c.msgFontWeight, d.msgFontWeight);
+            setVal('msgFontStyle', c.msgFontStyle, d.msgFontStyle);
+            setVal('msgLetterSpacing', c.msgLetterSpacing, d.msgLetterSpacing);
+            setVal('msgShadowColor', c.msgShadowColor, d.msgShadowColor);
+            setVal('msgShadowBlur', c.msgShadowBlur, d.msgShadowBlur);
+            setVal('msgShadowOffsetX', c.msgShadowOffsetX, d.msgShadowOffsetX);
+            setVal('msgShadowOffsetY', c.msgShadowOffsetY, d.msgShadowOffsetY);
+            setVal('chatBorderWidth', c.borderWidth, d.borderWidth);
+            setVal('chatBorderStyle', c.borderStyle, d.borderStyle);
+            setVal('chatBorderColor', c.borderColor, d.borderColor);
         }
 
         if (settings.events) {
             const e = settings.events;
-            document.getElementById('eventFontFamily').value = e.fontFamily;
-            document.getElementById('eventFontSize').value = e.fontSize;
-            document.getElementById('eventFontWeight').value = e.fontWeight;
-            document.getElementById('eventFontStyle').value = e.fontStyle;
-            document.getElementById('eventTextTransform').value = e.textTransform || 'none';
-            document.getElementById('eventTextColor').value = e.textColor;
-            document.getElementById('eventLabelColor').value = e.labelColor;
-            document.getElementById('eventLayout').value = e.layout;
-            document.getElementById('eventSpacing').value = e.spacing;
-            document.getElementById('eventOrientation').value = e.orientation;
-            document.getElementById('eventLabelPosition').value = e.labelPosition;
-            document.getElementById('eventBgColor').value = e.bgColor || 'transparent';
-            document.getElementById('eventBgOpacity').value = e.bgOpacity || 0;
-            document.getElementById('eventBorderRadius').value = e.borderRadius || 0;
-            document.getElementById('eventBorderWidth').value = e.borderWidth || 0;
-            document.getElementById('eventBorderStyle').value = e.borderStyle || 'solid';
-            document.getElementById('eventBorderColor').value = e.borderColor || '#ffffff';
-            document.getElementById('eventHighlightColor').value = e.highlightColor || '#00FF00';
-            document.getElementById('eventHighlightDuration').value = e.highlightDurationMs || 2000;
+            const d = defaults.events;
+            setVal('eventFontFamily', e.fontFamily, d.fontFamily);
+            setVal('eventFontSize', e.fontSize, d.fontSize);
+            setVal('eventFontWeight', e.fontWeight, d.fontWeight);
+            setVal('eventFontStyle', e.fontStyle, d.fontStyle);
+            setVal('eventTextTransform', e.textTransform, d.textTransform);
+            setVal('eventKerning', e.kerning, d.kerning);
+            setVal('eventTextColor', e.textColor, d.textColor);
+            setVal('eventLabelColor', e.labelColor, d.labelColor);
+            setVal('eventShadowColor', e.shadowColor, d.shadowColor);
+            setVal('eventShadowX', e.shadowX, d.shadowX);
+            setVal('eventShadowY', e.shadowY, d.shadowY);
+            setVal('eventShadowBlur', e.shadowBlur, d.shadowBlur);
+            setVal('eventLayout', e.layout, d.layout);
+            setVal('eventSpacing', e.spacing, d.spacing);
+            setVal('eventPadding', e.padding, d.padding);
+            setVal('eventOrientation', e.orientation, d.orientation);
+            setVal('eventLabelPosition', e.labelPosition, d.labelPosition);
+            setVal('eventBgColor', e.bgColor, d.bgColor);
+            setVal('eventBgOpacity', e.bgOpacity, d.bgOpacity);
+            setVal('eventBorderRadius', e.borderRadius, d.borderRadius);
+            setVal('eventBorderWidth', e.borderWidth, d.borderWidth);
+            setVal('eventBorderStyle', e.borderStyle, d.borderStyle);
+            setVal('eventBorderColor', e.borderColor, d.borderColor);
+            setVal('eventHighlightColor', e.highlightColor, d.highlightColor);
+            setVal('eventHighlightDuration', e.highlightDurationMs, d.highlightDurationMs);
         }
     } catch (e) {
         console.error("Failed to load settings from localStorage", e);
@@ -160,6 +200,9 @@ const updatePreview = () => {
         eventsPreview.style.fontStyle = settings.events.fontStyle;
         eventsPreview.style.color = settings.events.textColor;
         eventsPreview.style.textTransform = settings.events.textTransform;
+        eventsPreview.style.textDecoration = settings.events.textDecoration;
+        eventsPreview.style.letterSpacing = settings.events.kerning + 'px';
+        eventsPreview.style.textShadow = `${settings.events.shadowX}px ${settings.events.shadowY}px ${settings.events.shadowBlur}px ${settings.events.shadowColor}`;
 
         const labels = eventsPreview.querySelectorAll('.label');
         labels.forEach(l => l.style.color = settings.events.labelColor);
@@ -173,8 +216,8 @@ const updatePreview = () => {
 
         const eventContainers = eventsPreview.querySelectorAll('.event-container');
         const bgColor = hexToRgba(settings.events.bgColor, settings.events.bgOpacity);
-        const border = settings.events.borderWidth > 0 
-            ? `${settings.events.borderWidth}px ${settings.events.borderStyle} ${settings.events.borderColor}` 
+        const border = settings.events.borderWidth > 0
+            ? `${settings.events.borderWidth}px ${settings.events.borderStyle} ${settings.events.borderColor}`
             : 'none';
 
         eventContainers.forEach(c => {
@@ -183,7 +226,7 @@ const updatePreview = () => {
             c.style.border = border;
             c.style.borderRadius = settings.events.borderRadius + 'px';
             c.style.padding = settings.events.padding;
-            
+
             if (settings.events.orientation === 'stacked') {
                 c.style.display = 'flex';
                 c.style.flexDirection = 'column';
@@ -210,8 +253,8 @@ const updatePreview = () => {
         chatPreview.style.gap = settings.chat.messageGap + 'px';
 
         const bgColorWithOpacity = hexToRgba(settings.chat.pillboxBgColor, settings.chat.pillboxOpacity);
-        const border = settings.chat.borderWidth > 0 
-            ? `${settings.chat.borderWidth}px ${settings.chat.borderStyle} ${settings.chat.borderColor}` 
+        const border = settings.chat.borderWidth > 0
+            ? `${settings.chat.borderWidth}px ${settings.chat.borderStyle} ${settings.chat.borderColor}`
             : 'none';
 
         const messages = chatPreview.querySelectorAll('.chat-message');
@@ -229,7 +272,8 @@ const updatePreview = () => {
             u.style.fontWeight = settings.chat.userFontWeight;
             u.style.fontStyle = settings.chat.userFontStyle;
             u.style.textTransform = settings.chat.userTextTransform;
-            u.style.textShadow = `1px 1px ${settings.chat.userShadowBlur}px ${settings.chat.userShadowColor}`;
+            u.style.letterSpacing = settings.chat.userLetterSpacing + 'px';
+            u.style.textShadow = `${settings.chat.userShadowOffsetX || 1}px ${settings.chat.userShadowOffsetY || 1}px ${settings.chat.userShadowBlur}px ${settings.chat.userShadowColor}`;
         });
 
         const msgTexts = chatPreview.querySelectorAll('.message-text');
@@ -238,7 +282,9 @@ const updatePreview = () => {
             t.style.color = settings.chat.msgColor;
             t.style.fontSize = settings.chat.msgFontSize + 'px';
             t.style.fontWeight = settings.chat.msgFontWeight;
-            t.style.textShadow = `1px 1px ${settings.chat.msgShadowBlur}px ${settings.chat.msgShadowColor}`;
+            t.style.fontStyle = settings.chat.msgFontStyle;
+            t.style.letterSpacing = settings.chat.msgLetterSpacing + 'px';
+            t.style.textShadow = `${settings.chat.msgShadowOffsetX || 1}px ${settings.chat.msgShadowOffsetY || 1}px ${settings.chat.msgShadowBlur}px ${settings.chat.msgShadowColor}`;
         });
     }
 };
@@ -252,18 +298,41 @@ const validateInputs = () => {
     return true;
 };
 
+const getDiffSettings = (current, defaults) => {
+    const diff = {};
+    for (const key in current) {
+        if (typeof current[key] === 'object' && current[key] !== null) {
+            const nestedDiff = getDiffSettings(current[key], defaults[key] || {});
+            if (Object.keys(nestedDiff).length > 0) {
+                diff[key] = nestedDiff;
+            }
+        } else if (current[key] !== defaults[key]) {
+            diff[key] = current[key];
+        }
+    }
+    return diff;
+};
+
 const generateOBSUrl = (type = 'all') => {
     if (!validateInputs()) return;
 
     try {
         const settings = getSettings();
-        const jsonString = JSON.stringify(settings);
+        const diffSettings = getDiffSettings(settings, window.DEFAULT_SETTINGS);
+
+        diffSettings.general = {
+            twitchChannel: settings.general.twitchChannel,
+            clientId: settings.general.clientId,
+            accessToken: settings.general.accessToken
+        };
+
+        const jsonString = JSON.stringify(diffSettings);
         const encodedSettings = btoa(unescape(encodeURIComponent(jsonString)));
 
         const currentPath = window.location.href;
         const targetPath = currentPath.replace('settings.html', 'index.html');
         let finalUrl = `${targetPath}?cfg=${encodedSettings}`;
-        
+
         if (type !== 'all') {
             finalUrl += `&type=${type}`;
         }
@@ -306,7 +375,7 @@ const testChatMessage = () => {
     const testMsgs = ['PogChamp!', 'This overlay is fire!', 'How do I get this?', 'STRIX TOOLS FTW', 'Love the style!'];
     const randomName = TEST_NAMES[Math.floor(Math.random() * TEST_NAMES.length)];
     const randomMsg = testMsgs[Math.floor(Math.random() * testMsgs.length)];
-    const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+    const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
 
     const msgEl = document.createElement('div');
     msgEl.classList.add('chat-message');
@@ -335,7 +404,7 @@ const testEvent = () => {
     const events = ['follow', 'sub', 'cheer'];
     const randomEvent = events[Math.floor(Math.random() * events.length)];
     const randomName = TEST_NAMES[Math.floor(Math.random() * TEST_NAMES.length)];
-    
+
     const container = document.getElementById(`preview-${randomEvent}`);
     const valEl = container ? container.querySelector('.value') : null;
     if (!valEl) return;
@@ -350,9 +419,9 @@ const testEvent = () => {
 
         valEl.style.transition = 'color 0.3s';
         valEl.style.color = s.highlightColor;
-        
+
         eventTimeouts[randomEvent] = setTimeout(() => {
-            valEl.style.color = s.textColor;
+            valEl.style.color = '';
             delete eventTimeouts[randomEvent];
         }, s.highlightDurationMs);
     }
@@ -367,7 +436,7 @@ const openTab = (tabId) => {
 
     const targetTab = document.getElementById(tabId);
     if (targetTab) targetTab.classList.add('active');
-    
+
     buttons.forEach(btn => {
         if (btn.getAttribute('onclick')?.includes(tabId)) {
             btn.classList.add('active');
@@ -379,8 +448,7 @@ const resetToDefaults = () => {
     if (!confirm("Are you sure you want to reset all stylistic settings? Your Twitch credentials will be preserved.")) return;
 
     const defaults = window.DEFAULT_SETTINGS;
-    
-    // Reset Chat Inputs
+
     const c = defaults.chat;
     document.getElementById('maxMessages').value = c.maxMessages;
     document.getElementById('messageLifetime').value = c.messageLifetimeMs;
@@ -394,27 +462,39 @@ const resetToDefaults = () => {
     document.getElementById('userFontWeight').value = c.userFontWeight;
     document.getElementById('userFontStyle').value = c.userFontStyle;
     document.getElementById('userTextTransform').value = c.userTextTransform;
+    document.getElementById('userLetterSpacing').value = c.userLetterSpacing;
     document.getElementById('userShadowColor').value = c.userShadowColor;
     document.getElementById('userShadowBlur').value = c.userShadowBlur;
+    document.getElementById('userShadowOffsetX').value = c.userShadowOffsetX;
+    document.getElementById('userShadowOffsetY').value = c.userShadowOffsetY;
     document.getElementById('msgFontFamily').value = c.msgFontFamily;
     document.getElementById('msgColor').value = c.msgColor;
     document.getElementById('msgFontSize').value = c.msgFontSize;
     document.getElementById('msgFontWeight').value = c.msgFontWeight;
+    document.getElementById('msgFontStyle').value = c.msgFontStyle;
+    document.getElementById('msgLetterSpacing').value = c.msgLetterSpacing;
     document.getElementById('msgShadowColor').value = c.msgShadowColor;
     document.getElementById('msgShadowBlur').value = c.msgShadowBlur;
+    document.getElementById('msgShadowOffsetX').value = c.msgShadowOffsetX;
+    document.getElementById('msgShadowOffsetY').value = c.msgShadowOffsetY;
     document.getElementById('chatBorderWidth').value = c.borderWidth;
     document.getElementById('chatBorderStyle').value = c.borderStyle;
     document.getElementById('chatBorderColor').value = c.borderColor;
 
-    // Reset Event Inputs
     const e = defaults.events;
     document.getElementById('eventFontFamily').value = e.fontFamily;
     document.getElementById('eventFontSize').value = e.fontSize;
     document.getElementById('eventFontWeight').value = e.fontWeight;
     document.getElementById('eventFontStyle').value = e.fontStyle;
     document.getElementById('eventTextTransform').value = e.textTransform;
+    document.getElementById('eventTextDecoration').value = e.textDecoration;
+    document.getElementById('eventKerning').value = e.kerning;
     document.getElementById('eventTextColor').value = e.textColor;
     document.getElementById('eventLabelColor').value = e.labelColor;
+    document.getElementById('eventShadowColor').value = e.shadowColor;
+    document.getElementById('eventShadowX').value = e.shadowX;
+    document.getElementById('eventShadowY').value = e.shadowY;
+    document.getElementById('eventShadowBlur').value = e.shadowBlur;
     document.getElementById('eventLayout').value = e.layout;
     document.getElementById('eventSpacing').value = e.spacing;
     document.getElementById('eventOrientation').value = e.orientation;

@@ -14,7 +14,6 @@ body {
     box-sizing: border-box;
 }
 
-/* Event Styles */
 :root {
     --event-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     --event-font-size: 24px;
@@ -25,23 +24,9 @@ body {
     --event-text-color: #ffffff;
     --event-label-color: #ff9900;
     --event-text-shadow: 2px 2px 4px #000000;
-
-    --chat-pillbox-bg: rgba(0, 0, 0, 0.65);
-    --chat-pillbox-radius: 8px;
-    --chat-pillbox-padding: 8px 12px;
-    --chat-pillbox-border: none;
-    --chat-gap: 8px;
 }
 
 #events-container {
-    font-family: var(--event-font-family);
-    font-size: var(--event-font-size);
-    font-weight: var(--event-font-weight);
-    font-style: var(--event-font-style);
-    text-decoration: var(--event-text-decoration);
-    letter-spacing: var(--event-kerning);
-    color: var(--event-text-color);
-    text-shadow: var(--event-text-shadow);
     margin-bottom: 20px;
 }
 
@@ -50,7 +35,6 @@ body {
     margin-right: 5px;
 }
 
-/* Chat Styles */
 #chat-container {
     flex-grow: 1;
     overflow: hidden;

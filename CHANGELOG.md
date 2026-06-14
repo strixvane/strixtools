@@ -2,6 +2,21 @@
 
 A summary of all the new features and fixes added in this update.
 
+## [2.1.0] - 2026-06-14
+
+### Major New Features
+- **Clean URLs:** I've made the generated OBS links much shorter and smarter. They now only save the specific changes you've made, making them easier to copy and less likely to cause issues in OBS.
+
+### Better Customization
+- **Text Control:** You can now make your chat and follower labels *italic*, add extra space between letters, or underline them.
+- **Improved Shadows:** I've added new controls so you can move your text shadows exactly where you want them.
+- **Accurate Previews:** The "Live Preview" box now shows you exactly what your overlay will look like in OBS.
+
+### Reliability & "Under the Hood"
+- **Smoother & Faster:** I've made some performance improvements and optimizations to reduce the memory footprint a bit.
+- **Mistake-Proofing:** If you accidentally leave a setting empty or type something a bit off, the app will now automatically fix it with a safe default so nothing breaks.
+- **Bug Squashing:** Fixed a small issue where some of your font styles (like italics) wouldn't always show up correctly in the live chat.
+
 ## [2.0.0] - 2026-06-13
 
 ### New Features & Reliability

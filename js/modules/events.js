@@ -5,7 +5,7 @@ class EventsModule {
         this.userId = null;
         this.ws = null;
         this.reconnectAttempts = 0;
-        this.maxReconnectDelay = 30000; // 30 seconds
+        this.maxReconnectDelay = 30000;
         this.highlights = new Map();
     }
 
@@ -110,7 +110,6 @@ class EventsModule {
 
         console.log("Fetching initial event data...");
 
-        // Fetch Followers
         try {
             const folRes = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${userId}&moderator_id=${userId}`, { headers });
             if (!folRes.ok) {
@@ -125,7 +124,6 @@ class EventsModule {
             }
         } catch (err) { console.error("Follower fetch error:", err); }
 
-        // Fetch Subscriptions
         try {
             const subRes = await fetch(`https://api.twitch.tv/helix/subscriptions?broadcaster_id=${userId}`, { headers });
             if (!subRes.ok) {
@@ -235,7 +233,6 @@ class EventsModule {
         valEl.innerText = text;
 
         if (highlight && this.config.highlightDurationMs > 0) {
-            // Clear existing timeout if any
             if (this.highlights.has(elementId)) {
                 clearTimeout(this.highlights.get(elementId));
             }
