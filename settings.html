@@ -144,6 +144,20 @@
                         <input type="number" id="userShadowBlur" value="3">
                     </div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userLetterSpacing">Letter Spacing (px)</label>
+                        <input type="number" id="userLetterSpacing" value="0" min="-10" max="20">
+                    </div>
+                    <div class="form-group">
+                        <label for="userShadowOffsetX">Shadow Offset X (px)</label>
+                        <input type="number" id="userShadowOffsetX" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="userShadowOffsetY">Shadow Offset Y (px)</label>
+                        <input type="number" id="userShadowOffsetY" value="1">
+                    </div>
+                </div>
                 <div class="form-group">
                     <label for="userShadowColor">Shadow Color</label>
                     <input type="color" id="userShadowColor" value="#000000">
@@ -186,6 +200,29 @@
                         <input type="number" id="msgShadowBlur" value="2">
                     </div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="msgFontStyle">Style</label>
+                        <select id="msgFontStyle">
+                            <option value="normal" selected>Normal</option>
+                            <option value="italic">Italic</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="msgLetterSpacing">Letter Spacing (px)</label>
+                        <input type="number" id="msgLetterSpacing" value="0" min="-10" max="20">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="msgShadowOffsetX">Shadow Offset X (px)</label>
+                        <input type="number" id="msgShadowOffsetX" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="msgShadowOffsetY">Shadow Offset Y (px)</label>
+                        <input type="number" id="msgShadowOffsetY" value="1">
+                    </div>
+                </div>
             </fieldset>
         </div>
 
@@ -217,6 +254,26 @@
                             <option value="uppercase" selected>UPPERCASE</option>
                             <option value="lowercase">lowercase</option>
                         </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventFontStyle">Style</label>
+                        <select id="eventFontStyle">
+                            <option value="normal" selected>Normal</option>
+                            <option value="italic">Italic</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventTextDecoration">Text Decoration</label>
+                        <select id="eventTextDecoration">
+                            <option value="none" selected>None</option>
+                            <option value="underline">Underline</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventKerning">Letter Spacing (px)</label>
+                        <input type="number" id="eventKerning" value="1" min="-10" max="20">
                     </div>
                 </div>
             </fieldset>
@@ -269,6 +326,30 @@
                     <div class="form-group">
                         <label for="eventHighlightDuration">Duration (ms)</label>
                         <input type="number" id="eventHighlightDuration" value="2000" min="0" step="100">
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Text Shadow</legend>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventShadowColor">Shadow Color</label>
+                        <input type="color" id="eventShadowColor" value="#000000">
+                    </div>
+                    <div class="form-group">
+                        <label for="eventShadowBlur">Shadow Blur (px)</label>
+                        <input type="number" id="eventShadowBlur" value="4">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventShadowX">Shadow Offset X (px)</label>
+                        <input type="number" id="eventShadowX" value="2">
+                    </div>
+                    <div class="form-group">
+                        <label for="eventShadowY">Shadow Offset Y (px)</label>
+                        <input type="number" id="eventShadowY" value="2">
                     </div>
                 </div>
             </fieldset>
@@ -375,6 +456,7 @@
         </div>
     </div>
 
-    <script src="js/settings.js"></script>
+    <script src="js/config.js" defer></script>
+    <script src="js/settings.js" defer></script>
 </body>
 </html>
