@@ -19,6 +19,10 @@ const getSettings = () => {
         const val = parseInt(document.getElementById(id)?.value);
         return isNaN(val) ? defaultValue : val;
     };
+    const getBool = (id, defaultValue = false) => {
+        const el = document.getElementById(id);
+        return el ? el.checked : defaultValue;
+    };
 
     const defaults = window.DEFAULT_SETTINGS || { general: {}, chat: {}, events: {} };
 
@@ -29,6 +33,7 @@ const getSettings = () => {
             accessToken: getValue('accessToken', defaults.general.accessToken)
         },
         chat: {
+            showBadges: getBool('showBadges', defaults.chat.showBadges),
             maxMessages: getInt('maxMessages', defaults.chat.maxMessages),
             messageLifetimeMs: getInt('messageLifetime', defaults.chat.messageLifetimeMs),
             pillboxBgColor: getValue('pillboxBgColor', defaults.chat.pillboxBgColor),
@@ -111,6 +116,10 @@ const loadFromLocalStorage = () => {
             const el = document.getElementById(id);
             if (el) el.value = (val !== undefined) ? val : defaultVal;
         };
+        const setBool = (id, val, defaultVal) => {
+            const el = document.getElementById(id);
+            if (el) el.checked = (val !== undefined) ? val : defaultVal;
+        };
 
         if (settings.general) {
             setVal('twitchChannel', settings.general.twitchChannel, defaults.general.twitchChannel);
@@ -121,6 +130,7 @@ const loadFromLocalStorage = () => {
         if (settings.chat) {
             const c = settings.chat;
             const d = defaults.chat;
+            setBool('showBadges', c.showBadges, d.showBadges);
             setVal('maxMessages', c.maxMessages, d.maxMessages);
             setVal('messageLifetime', c.messageLifetimeMs, d.messageLifetimeMs);
             setVal('pillboxBgColor', c.pillboxBgColor, d.pillboxBgColor);
@@ -263,6 +273,57 @@ const updatePreview = () => {
             msg.style.borderRadius = settings.chat.pillboxRadius + 'px';
             msg.style.padding = settings.chat.pillboxPadding;
             msg.style.border = border;
+
+            const usernameEl = msg.querySelector('.username');
+            if (usernameEl) {
+                let badgesContainer = usernameEl.querySelector('.badges-container');
+                if (!badgesContainer) {
+                    badgesContainer = document.createElement('span');
+                    badgesContainer.classList.add('badges-container');
+                    usernameEl.prepend(badgesContainer);
+                }
+
+                if (settings.chat.showBadges) {
+                    const badgesAttr = msg.getAttribute('data-badges');
+                    if (badgesAttr) {
+                        const badgeNames = badgesAttr.split(',');
+                        let badgesHTML = '';
+                        badgeNames.forEach(badgeName => {
+                            const badge = window.MOCK_BADGES[badgeName];
+                            if (badge) {
+                                const version = Object.keys(badge)[0];
+                                if (version && badge[version]) {
+                                    badgesHTML += `<img class="chat-badge" src="${badge[version].image}" alt="${badgeName}" title="${badgeName}" />`;
+                                }
+                            }
+                        });
+                        badgesContainer.innerHTML = badgesHTML;
+                        badgesContainer.style.display = '';
+                    } else {
+                        badgesContainer.innerHTML = '';
+                        badgesContainer.style.display = 'none';
+                    }
+                } else {
+                    badgesContainer.style.display = 'none';
+                }
+            }
+        });
+
+        const badges = chatPreview.querySelectorAll('.chat-badge');
+        badges.forEach(b => {
+            b.style.display = 'inline-block';
+            b.style.verticalAlign = 'middle';
+            b.style.height = '1em';
+            b.style.width = '1em';
+            b.style.marginRight = '0.2em';
+            b.style.borderRadius = '2px';
+        });
+
+        const badgeContainers = chatPreview.querySelectorAll('.badges-container');
+        badgeContainers.forEach(bc => {
+            bc.style.display = settings.chat.showBadges ? 'inline-flex' : 'none';
+            bc.style.alignItems = 'center';
+            bc.style.marginRight = '0.3em';
         });
 
         const usernames = chatPreview.querySelectorAll('.username');
@@ -377,8 +438,21 @@ const testChatMessage = () => {
     const randomMsg = testMsgs[Math.floor(Math.random() * testMsgs.length)];
     const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
 
+    const possibleBadges = ['subscriber', 'moderator', 'vip', 'broadcaster'];
+    const numBadges = Math.floor(Math.random() * 3);
+    const selectedBadges = [];
+    for (let i = 0; i < numBadges; i++) {
+        const badge = possibleBadges[Math.floor(Math.random() * possibleBadges.length)];
+        if (!selectedBadges.includes(badge)) {
+            selectedBadges.push(badge);
+        }
+    }
+
     const msgEl = document.createElement('div');
     msgEl.classList.add('chat-message');
+    if (selectedBadges.length > 0) {
+        msgEl.setAttribute('data-badges', selectedBadges.join(','));
+    }
     msgEl.innerHTML = `
         <span class="username" style="color: ${randomColor};">${randomName}:</span>
         <span class="message-text">${randomMsg}</span>
@@ -450,6 +524,7 @@ const resetToDefaults = () => {
     const defaults = window.DEFAULT_SETTINGS;
 
     const c = defaults.chat;
+    document.getElementById('showBadges').checked = c.showBadges;
     document.getElementById('maxMessages').value = c.maxMessages;
     document.getElementById('messageLifetime').value = c.messageLifetimeMs;
     document.getElementById('pillboxBgColor').value = c.pillboxBgColor;
@@ -522,6 +597,10 @@ const initSettings = () => {
     loadFromLocalStorage();
     document.querySelectorAll('input, select').forEach(el => {
         el.addEventListener('input', () => {
+            updatePreview();
+            saveToLocalStorage();
+        });
+        el.addEventListener('change', () => {
             updatePreview();
             saveToLocalStorage();
         });
