@@ -16,7 +16,7 @@ StrixTools is a lightweight, high-performance, and highly customizable Twitch ov
 ## Setup Instructions
 
 ### 1. Initial Configuration (OBS Custom Dock)
-The best way to use StrixTools is by adding the settings page directly into OBS. This allows you to see changes live on your stream as you make them.
+The best way to use StrixTools is by adding the settings page directly into OBS. This allows you to see changes live on your stream as you make them. Alternatively you can open `settings.html` in a browser and generate the URLS from there. If you do this just make sure you copy the generated URL and paste it into the URL field of the browser source in OBS.
 
 1. In OBS, go to **View** -> **Docks** -> **Custom Browser Docks...**
 2. **Dock Name:** `StrixTools Settings`

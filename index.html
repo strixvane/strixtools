@@ -50,9 +50,11 @@
             if (!type || type === 'chat') {
                 if (chatModule) {
                     chatModule.config = { ...settings.chat, twitchChannel: settings.general.twitchChannel };
+                    chatModule.twitchClient = twitchClient;
                     chatModule.applyStyles();
+                    chatModule.loadBadges();
                 } else {
-                    chatModule = new window.ChatModule({ ...settings.chat, twitchChannel: settings.general.twitchChannel });
+                    chatModule = new window.ChatModule({ ...settings.chat, twitchChannel: settings.general.twitchChannel }, twitchClient);
                     chatModule.init('chat-container');
                 }
             }
@@ -68,7 +70,6 @@
                 }
             }
 
-            // Handle visibility based on 'type' query parameter
             const eventsContainer = document.getElementById('events-container');
             const chatContainer = document.getElementById('chat-container');
             const followEl = document.getElementById('latest-follow');
@@ -97,7 +98,6 @@
                 if (subEl) subEl.style.display = 'none';
                 if (cheerEl) cheerEl.style.display = '';
             } else {
-                // All-in-one or default
                 if (eventsContainer) eventsContainer.style.display = '';
                 if (chatContainer) chatContainer.style.display = '';
                 if (followEl) followEl.style.display = '';

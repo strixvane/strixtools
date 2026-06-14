@@ -2,6 +2,18 @@
 
 A summary of all the new features and fixes added in this update.
 
+## [2.2.0] - 2026-06-14
+
+### New Feature
+- Added Twitch badges to chat overlay. Now displays user badges in chat for mods, subs, turbo, etc.
+- Made Twitch badges optional, just uncheck the box in the chat settings to hide them.
+- Updated instructions in the README to be a little clearer.
+
+## [2.1.1] - 2026-06-14
+
+### Fix
+- Broke the individual elements copy URL buttons, issue now resolved. Also fixed the green confirmation when button is clicked and text copied so that it now correctly overlays the button that was pressed.
+
 ## [2.1.0] - 2026-06-14
 
 ### Major New Features
