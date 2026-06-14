@@ -67,6 +67,43 @@
                     await eventsModule.init();
                 }
             }
+
+            // Handle visibility based on 'type' query parameter
+            const eventsContainer = document.getElementById('events-container');
+            const chatContainer = document.getElementById('chat-container');
+            const followEl = document.getElementById('latest-follow');
+            const subEl = document.getElementById('latest-subscribe');
+            const cheerEl = document.getElementById('latest-cheer');
+
+            if (type === 'chat') {
+                if (eventsContainer) eventsContainer.style.display = 'none';
+                if (chatContainer) chatContainer.style.display = '';
+            } else if (type === 'follow') {
+                if (eventsContainer) eventsContainer.style.display = '';
+                if (chatContainer) chatContainer.style.display = 'none';
+                if (followEl) followEl.style.display = '';
+                if (subEl) subEl.style.display = 'none';
+                if (cheerEl) cheerEl.style.display = 'none';
+            } else if (type === 'sub') {
+                if (eventsContainer) eventsContainer.style.display = '';
+                if (chatContainer) chatContainer.style.display = 'none';
+                if (followEl) followEl.style.display = 'none';
+                if (subEl) subEl.style.display = '';
+                if (cheerEl) cheerEl.style.display = 'none';
+            } else if (type === 'cheer') {
+                if (eventsContainer) eventsContainer.style.display = '';
+                if (chatContainer) chatContainer.style.display = 'none';
+                if (followEl) followEl.style.display = 'none';
+                if (subEl) subEl.style.display = 'none';
+                if (cheerEl) cheerEl.style.display = '';
+            } else {
+                // All-in-one or default
+                if (eventsContainer) eventsContainer.style.display = '';
+                if (chatContainer) chatContainer.style.display = '';
+                if (followEl) followEl.style.display = '';
+                if (subEl) subEl.style.display = '';
+                if (cheerEl) cheerEl.style.display = '';
+            }
         };
 
         const syncChannel = new BroadcastChannel('strixtools_sync');

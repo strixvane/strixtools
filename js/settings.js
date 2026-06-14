@@ -345,7 +345,7 @@ const generateOBSUrl = (type = 'all') => {
 
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(finalUrl).then(() => {
-                const btn = document.querySelector('.action-btn');
+                const btn = document.querySelector(`.action-btn[onclick*="'${type}'"]`);
                 if (btn) {
                     const originalText = btn.innerText;
                     btn.innerText = "Copied to Clipboard!";
