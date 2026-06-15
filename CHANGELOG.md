@@ -2,6 +2,25 @@
 
 A summary of all the new features and fixes added in this update.
 
+## [2.4.0] - 2026-06-15
+
+### Retro Windows 95 Theme
+- **Retro Look & Feel:** Added a theme selection option to give your chat messages a classic, old-school Windows 95 look!
+- **Authentic Windows Design:** When selected, your chat messages turn into classic gray dialog boxes, complete with 3D borders, a dark blue title bar displaying the username, and a white message text box.
+- **Retro Close Button:** Each chat message window features a simulated close button "X" in the top-right corner, just like the real operating system.
+- **Theme Selection Dropdown:** Added a new dropdown menu in your settings page under the Chat tab to easily switch between the default "Modern Pillbox" style and the new "Retro Windows 95" theme.
+
+## [2.3.0] - 2026-06-15
+
+### Optional Profile Pictures
+- **Show Chat Avatars:** You can now show Twitch profile pictures right next to people's usernames in your chat overlay! Just check the new box in the settings page.
+- **Shape & Size Controls:** You can choose exactly how big or small the profile pictures are, and make them circles, soft rounded squares, or regular squares.
+- **Centered Text:** I've aligned the username and chat text to be perfectly centered with the middle of the profile picture so everything looks super neat and tidy.
+
+### Reliability & "Under the Hood"
+- **Twitch-Friendly Loading:** I've optimized how the app gets profile pictures from Twitch so it loads them in groups and remembers them. This keeps the overlay fast, lightweight, and prevents you from hitting any Twitch limits.
+- **Sleek Default Avatar:** If you don't have your Twitch account details set up in the General tab, or while a profile picture is loading, the overlay will display a default avatar placeholder.
+
 ## [2.2.0] - 2026-06-14
 
 ### New Feature

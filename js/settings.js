@@ -33,7 +33,11 @@ const getSettings = () => {
             accessToken: getValue('accessToken', defaults.general.accessToken)
         },
         chat: {
+            theme: getValue('chatTheme', defaults.chat.theme),
             showBadges: getBool('showBadges', defaults.chat.showBadges),
+            showProfilePics: getBool('showProfilePics', defaults.chat.showProfilePics),
+            profilePicSize: getInt('profilePicSize', defaults.chat.profilePicSize),
+            profilePicRadius: getInt('profilePicRadius', defaults.chat.profilePicRadius),
             maxMessages: getInt('maxMessages', defaults.chat.maxMessages),
             messageLifetimeMs: getInt('messageLifetime', defaults.chat.messageLifetimeMs),
             pillboxBgColor: getValue('pillboxBgColor', defaults.chat.pillboxBgColor),
@@ -130,7 +134,11 @@ const loadFromLocalStorage = () => {
         if (settings.chat) {
             const c = settings.chat;
             const d = defaults.chat;
+            setVal('chatTheme', c.theme, d.theme);
             setBool('showBadges', c.showBadges, d.showBadges);
+            setBool('showProfilePics', c.showProfilePics, d.showProfilePics);
+            setVal('profilePicSize', c.profilePicSize, d.profilePicSize);
+            setVal('profilePicRadius', c.profilePicRadius, d.profilePicRadius);
             setVal('maxMessages', c.maxMessages, d.maxMessages);
             setVal('messageLifetime', c.messageLifetimeMs, d.messageLifetimeMs);
             setVal('pillboxBgColor', c.pillboxBgColor, d.pillboxBgColor);
@@ -269,42 +277,183 @@ const updatePreview = () => {
 
         const messages = chatPreview.querySelectorAll('.chat-message');
         messages.forEach(msg => {
-            msg.style.backgroundColor = bgColorWithOpacity;
-            msg.style.borderRadius = settings.chat.pillboxRadius + 'px';
-            msg.style.padding = settings.chat.pillboxPadding;
-            msg.style.border = border;
+            let username = msg.getAttribute('data-username');
+            let messageText = msg.getAttribute('data-messagetext');
+            let userColor = msg.getAttribute('data-usercolor');
+            const badgesAttr = msg.getAttribute('data-badges');
 
-            const usernameEl = msg.querySelector('.username');
-            if (usernameEl) {
-                let badgesContainer = usernameEl.querySelector('.badges-container');
-                if (!badgesContainer) {
-                    badgesContainer = document.createElement('span');
-                    badgesContainer.classList.add('badges-container');
-                    usernameEl.prepend(badgesContainer);
+            if (!username) {
+                const usernameEl = msg.querySelector('.username');
+                if (usernameEl) {
+                    username = usernameEl.textContent.trim().replace(/:$/, '');
+                    msg.setAttribute('data-username', username);
+                    userColor = usernameEl.style.color || '#9146FF';
+                    msg.setAttribute('data-usercolor', userColor);
+                }
+            }
+            if (!messageText) {
+                const textEl = msg.querySelector('.message-text');
+                if (textEl) {
+                    messageText = textEl.innerHTML;
+                    msg.setAttribute('data-messagetext', messageText);
+                }
+            }
+
+            // Rebuild elements
+            msg.innerHTML = '';
+
+            let badgesHTML = '';
+            if (settings.chat.showBadges && badgesAttr) {
+                const badgeNames = badgesAttr.split(',');
+                badgeNames.forEach(badgeName => {
+                    const badge = window.MOCK_BADGES[badgeName];
+                    if (badge) {
+                        const version = Object.keys(badge)[0];
+                        if (version && badge[version]) {
+                            badgesHTML += `<img class="chat-badge" src="${badge[version].image}" alt="${badgeName}" title="${badgeName}" />`;
+                        }
+                    }
+                });
+                if (badgesHTML) {
+                    badgesHTML = `<span class="badges-container">${badgesHTML}</span>`;
+                }
+            }
+
+            const fallbackUrl = 'assets/default-avatar.png';
+            const profilePicHTML = settings.chat.showProfilePics
+                ? `<img class="profile-pic" src="${fallbackUrl}" alt="${username}" />`
+                : '';
+
+            if (settings.chat.theme === 'windows95') {
+                msg.classList.add('theme-windows95');
+                msg.innerHTML = `
+                    <div class="win95-titlebar">
+                        <span class="win95-title">${badgesHTML}${username}</span>
+                        <button class="win95-close-btn" aria-label="Close">×</button>
+                    </div>
+                    <div class="win95-body">
+                        ${profilePicHTML}
+                        <div class="message-content">
+                            <span class="message-text">${messageText}</span>
+                        </div>
+                    </div>
+                `;
+
+                // Set inline styles for Windows 95
+                msg.style.backgroundColor = '#c0c0c0';
+                msg.style.borderRadius = '0px';
+                msg.style.padding = '2px';
+                msg.style.border = '2px solid';
+                msg.style.borderColor = '#ffffff #808080 #808080 #ffffff';
+                msg.style.display = 'flex';
+                msg.style.flexDirection = 'column';
+                msg.style.alignItems = 'stretch';
+                msg.style.gap = '0px';
+
+                const titlebar = msg.querySelector('.win95-titlebar');
+                const title = msg.querySelector('.win95-title');
+                const closeBtn = msg.querySelector('.win95-close-btn');
+                const win95Body = msg.querySelector('.win95-body');
+                const pic = msg.querySelector('.profile-pic');
+                const msgText = msg.querySelector('.message-text');
+
+                if (titlebar) {
+                    titlebar.style.display = 'flex';
+                    titlebar.style.alignItems = 'center';
+                    titlebar.style.justifyContent = 'space-between';
+                    titlebar.style.backgroundColor = '#000080';
+                    titlebar.style.color = '#ffffff';
+                    titlebar.style.padding = '3px 4px';
+                    titlebar.style.marginBottom = '2px';
+                }
+                if (title) {
+                    title.style.fontFamily = '"MS Sans Serif", Tahoma, Geneva, sans-serif';
+                    title.style.fontSize = '11px';
+                    title.style.fontWeight = 'bold';
+                    title.style.color = '#ffffff';
+                    title.style.textShadow = 'none';
+                    title.style.textTransform = 'none';
+                    title.style.letterSpacing = '0px';
+                }
+                if (closeBtn) {
+                    closeBtn.style.fontFamily = '"MS Sans Serif", Tahoma, Geneva, sans-serif';
+                    closeBtn.style.fontSize = '9px';
+                    closeBtn.style.fontWeight = 'bold';
+                    closeBtn.style.width = '16px';
+                    closeBtn.style.height = '14px';
+                    closeBtn.style.backgroundColor = '#c0c0c0';
+                    closeBtn.style.color = '#000000';
+                    closeBtn.style.border = '1px solid';
+                    closeBtn.style.borderColor = '#ffffff #5a5a5a #5a5a5a #ffffff';
+                    closeBtn.style.display = 'flex';
+                    closeBtn.style.alignItems = 'center';
+                    closeBtn.style.justifyContent = 'center';
+                    closeBtn.style.padding = '0';
+                    closeBtn.style.margin = '0';
+                }
+                if (win95Body) {
+                    win95Body.style.backgroundColor = '#ffffff';
+                    win95Body.style.border = '2px solid';
+                    win95Body.style.borderColor = '#808080 #ffffff #ffffff #808080';
+                    win95Body.style.padding = '6px 8px';
+                    win95Body.style.color = '#000000';
+                    win95Body.style.display = 'flex';
+                    win95Body.style.alignItems = 'center';
+                    win95Body.style.gap = '8px';
+                }
+                if (pic) {
+                    pic.style.width = settings.chat.profilePicSize + 'px';
+                    pic.style.height = settings.chat.profilePicSize + 'px';
+                    pic.style.borderRadius = '0px';
+                    pic.style.border = '1px solid #808080';
+                    pic.style.flexShrink = '0';
+                    pic.style.objectFit = 'cover';
+                    pic.style.display = settings.chat.showProfilePics ? 'block' : 'none';
+                }
+                if (msgText) {
+                    msgText.style.fontFamily = '"MS Sans Serif", Tahoma, Geneva, sans-serif';
+                    msgText.style.color = '#000000';
+                    msgText.style.textShadow = 'none';
+                    msgText.style.fontSize = '12px';
+                    msgText.style.fontWeight = 'normal';
+                    msgText.style.fontStyle = 'normal';
+                    msgText.style.letterSpacing = '0px';
+                }
+            } else {
+                msg.classList.remove('theme-windows95');
+                msg.innerHTML = `
+                    <img class="profile-pic" src="${fallbackUrl}" alt="${username}" />
+                    <div class="message-content">
+                        <span class="username">${badgesHTML}${username}:</span>
+                        <span class="message-text">${messageText}</span>
+                    </div>
+                `;
+
+                // Set inline styles for Default (Modern Pillbox)
+                msg.style.backgroundColor = bgColorWithOpacity;
+                msg.style.borderRadius = settings.chat.pillboxRadius + 'px';
+                msg.style.padding = settings.chat.pillboxPadding;
+                msg.style.border = border;
+                msg.style.borderColor = '';
+                msg.style.display = 'flex';
+                msg.style.alignItems = 'center';
+                msg.style.gap = '10px';
+                msg.style.flexDirection = '';
+
+                const pic = msg.querySelector('.profile-pic');
+                if (pic) {
+                    pic.style.width = settings.chat.profilePicSize + 'px';
+                    pic.style.height = settings.chat.profilePicSize + 'px';
+                    pic.style.borderRadius = settings.chat.profilePicRadius + '%';
+                    pic.style.border = '';
+                    pic.style.flexShrink = '0';
+                    pic.style.objectFit = 'cover';
+                    pic.style.display = settings.chat.showProfilePics ? 'block' : 'none';
                 }
 
-                if (settings.chat.showBadges) {
-                    const badgesAttr = msg.getAttribute('data-badges');
-                    if (badgesAttr) {
-                        const badgeNames = badgesAttr.split(',');
-                        let badgesHTML = '';
-                        badgeNames.forEach(badgeName => {
-                            const badge = window.MOCK_BADGES[badgeName];
-                            if (badge) {
-                                const version = Object.keys(badge)[0];
-                                if (version && badge[version]) {
-                                    badgesHTML += `<img class="chat-badge" src="${badge[version].image}" alt="${badgeName}" title="${badgeName}" />`;
-                                }
-                            }
-                        });
-                        badgesContainer.innerHTML = badgesHTML;
-                        badgesContainer.style.display = '';
-                    } else {
-                        badgesContainer.innerHTML = '';
-                        badgesContainer.style.display = 'none';
-                    }
-                } else {
-                    badgesContainer.style.display = 'none';
+                const usernameEl = msg.querySelector('.username');
+                if (usernameEl && userColor) {
+                    usernameEl.style.color = userColor;
                 }
             }
         });
@@ -326,7 +475,7 @@ const updatePreview = () => {
             bc.style.marginRight = '0.3em';
         });
 
-        const usernames = chatPreview.querySelectorAll('.username');
+        const usernames = chatPreview.querySelectorAll('.chat-message:not(.theme-windows95) .username');
         usernames.forEach(u => {
             u.style.fontFamily = settings.chat.userFontFamily;
             u.style.fontSize = settings.chat.userFontSize + 'px';
@@ -337,7 +486,7 @@ const updatePreview = () => {
             u.style.textShadow = `${settings.chat.userShadowOffsetX || 1}px ${settings.chat.userShadowOffsetY || 1}px ${settings.chat.userShadowBlur}px ${settings.chat.userShadowColor}`;
         });
 
-        const msgTexts = chatPreview.querySelectorAll('.message-text');
+        const msgTexts = chatPreview.querySelectorAll('.chat-message:not(.theme-windows95) .message-text');
         msgTexts.forEach(t => {
             t.style.fontFamily = settings.chat.msgFontFamily;
             t.style.color = settings.chat.msgColor;
@@ -524,7 +673,11 @@ const resetToDefaults = () => {
     const defaults = window.DEFAULT_SETTINGS;
 
     const c = defaults.chat;
+    document.getElementById('chatTheme').value = c.theme;
     document.getElementById('showBadges').checked = c.showBadges;
+    document.getElementById('showProfilePics').checked = c.showProfilePics;
+    document.getElementById('profilePicSize').value = c.profilePicSize;
+    document.getElementById('profilePicRadius').value = c.profilePicRadius;
     document.getElementById('maxMessages').value = c.maxMessages;
     document.getElementById('messageLifetime').value = c.messageLifetimeMs;
     document.getElementById('pillboxBgColor').value = c.pillboxBgColor;
