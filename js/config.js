@@ -6,6 +6,10 @@ const DEFAULT_SETTINGS = {
     },
     chat: {
         showBadges: true,
+        showProfilePics: false,
+        theme: 'default',
+        profilePicSize: 32,
+        profilePicRadius: 50,
         maxMessages: 15,
         messageLifetimeMs: 20000,
         pillboxBgColor: '#000000',

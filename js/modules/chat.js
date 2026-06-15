@@ -112,6 +112,8 @@ class ChatModule {
             ? `${settings.borderWidth}px ${settings.borderStyle} ${settings.borderColor}` 
             : 'none';
 
+        const showProfilePics = settings.showProfilePics;
+
         dynamicStyles.innerHTML = `
             #chat-container { 
                 display: flex;
@@ -124,6 +126,21 @@ class ChatModule {
                 padding: ${settings.pillboxPadding};
                 border: ${border};
                 margin-bottom: 0;
+                display: ${showProfilePics ? 'flex' : 'block'};
+                align-items: center;
+                gap: 10px;
+            }
+            .profile-pic {
+                width: ${settings.profilePicSize}px;
+                height: ${settings.profilePicSize}px;
+                border-radius: ${settings.profilePicRadius}%;
+                flex-shrink: 0;
+                object-fit: cover;
+                display: ${showProfilePics ? 'block' : 'none'};
+            }
+            .message-content {
+                flex-grow: 1;
+                word-break: break-word;
             }
             .username {
                 font-family: ${settings.userFontFamily};
@@ -166,11 +183,188 @@ class ChatModule {
                 from { opacity: 1; }
                 to { opacity: 0; }
             }
+
+            /* Windows 95 Theme */
+            .chat-message.theme-windows95 {
+                background-color: #c0c0c0 !important;
+                border-radius: 0px !important;
+                border: 2px solid !important;
+                border-color: #ffffff #808080 #808080 #ffffff !important;
+                padding: 2px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 0px !important;
+                box-shadow: none !important;
+                margin-bottom: 0px;
+            }
+            .win95-titlebar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: #000080;
+                color: #ffffff;
+                padding: 3px 4px;
+                margin-bottom: 2px;
+                user-select: none;
+            }
+            .win95-title {
+                font-family: "MS Sans Serif", Tahoma, Geneva, sans-serif;
+                font-size: 11px;
+                font-weight: bold;
+                color: #ffffff !important;
+                text-shadow: none !important;
+                text-transform: none !important;
+                letter-spacing: 0px !important;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+            .win95-close-btn {
+                font-family: "MS Sans Serif", Tahoma, Geneva, sans-serif;
+                font-size: 9px;
+                font-weight: bold;
+                width: 16px;
+                height: 14px;
+                background-color: #c0c0c0;
+                color: #000000;
+                border: 1px solid;
+                border-color: #ffffff #5a5a5a #5a5a5a #ffffff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                margin: 0;
+                cursor: pointer;
+            }
+            .win95-close-btn:active {
+                border-color: #5a5a5a #ffffff #ffffff #5a5a5a;
+                padding: 1px 0 0 1px;
+            }
+            .win95-body {
+                background-color: #ffffff;
+                border: 2px solid;
+                border-color: #808080 #ffffff #ffffff #808080;
+                padding: 6px 8px;
+                color: #000000;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .theme-windows95 .profile-pic {
+                border-radius: 0px !important;
+                border: 1px solid #808080 !important;
+            }
+            .theme-windows95 .message-text {
+                font-family: "MS Sans Serif", Tahoma, Geneva, sans-serif !important;
+                color: #000000 !important;
+                text-shadow: none !important;
+                font-size: 12px !important;
+                font-weight: normal !important;
+                font-style: normal !important;
+                letter-spacing: 0px !important;
+            }
         `;
         
         const existing = document.getElementById('chat-dynamic-styles');
         if (existing) existing.remove();
         document.head.appendChild(dynamicStyles);
+    }
+
+    async fetchUserProfilePic(userId) {
+        if (!this.profilePicsCache) {
+            this.profilePicsCache = {};
+            this.pendingUserFetches = [];
+            this.pendingUserResolvers = {};
+            this.fetchTimeout = null;
+        }
+
+        if (this.profilePicsCache[userId]) {
+            return this.profilePicsCache[userId];
+        }
+
+        return new Promise((resolve) => {
+            if (!this.pendingUserResolvers[userId]) {
+                this.pendingUserResolvers[userId] = [];
+            }
+            this.pendingUserResolvers[userId].push(resolve);
+
+            if (!this.pendingUserFetches.includes(userId)) {
+                this.pendingUserFetches.push(userId);
+            }
+
+            if (this.fetchTimeout) {
+                clearTimeout(this.fetchTimeout);
+            }
+
+            this.fetchTimeout = setTimeout(() => {
+                this.processPendingUserFetches();
+            }, 50);
+        });
+    }
+
+    async processPendingUserFetches() {
+        const userIds = [...this.pendingUserFetches];
+        this.pendingUserFetches = [];
+
+        if (userIds.length === 0) return;
+
+        const chunks = [];
+        for (let i = 0; i < userIds.length; i += 100) {
+            chunks.push(userIds.slice(i, i + 100));
+        }
+
+        for (const chunk of chunks) {
+            try {
+                const query = chunk.map(id => `id=${encodeURIComponent(id)}`).join('&');
+                const url = `https://api.twitch.tv/helix/users?${query}`;
+                
+                const res = await fetch(url, {
+                    headers: this.twitchClient.getHeaders()
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Twitch API error: ${res.statusText}`);
+                }
+
+                const data = await res.json();
+                const fetchedIds = new Set();
+
+                if (data.data) {
+                    for (const user of data.data) {
+                        const id = user.id;
+                        const profileUrl = user.profile_image_url;
+                        this.profilePicsCache[id] = profileUrl;
+                        fetchedIds.add(id);
+
+                        const resolvers = this.pendingUserResolvers[id];
+                        if (resolvers) {
+                            resolvers.forEach(resolve => resolve(profileUrl));
+                            delete this.pendingUserResolvers[id];
+                        }
+                    }
+                }
+
+                for (const id of chunk) {
+                    if (!fetchedIds.has(id)) {
+                        const resolvers = this.pendingUserResolvers[id];
+                        if (resolvers) {
+                            resolvers.forEach(resolve => resolve('assets/default-avatar.png'));
+                            delete this.pendingUserResolvers[id];
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Error batch fetching profile pictures:", err);
+                for (const id of chunk) {
+                    const resolvers = this.pendingUserResolvers[id];
+                    if (resolvers) {
+                        resolvers.forEach(resolve => resolve('assets/default-avatar.png'));
+                        delete this.pendingUserResolvers[id];
+                    }
+                }
+            }
+        }
     }
 
     async handleMessage(channel, tags, message, self) {
@@ -201,15 +395,55 @@ class ChatModule {
             }
         }
 
-        messageElement.innerHTML = `
-            <span class="username">${badgesHTML}${displayName}:</span>
-            <span class="message-text">${contentHTML}</span>
-        `;
+        const fallbackUrl = 'assets/default-avatar.png';
+        const profilePicHTML = this.config.showProfilePics
+            ? `<img class="profile-pic" src="${fallbackUrl}" alt="${displayName}" />`
+            : '';
 
-        const usernameElement = messageElement.querySelector('.username');
-        usernameElement.style.color = userColor;
+        if (this.config.theme === 'windows95') {
+            messageElement.classList.add('theme-windows95');
+            messageElement.innerHTML = `
+                <div class="win95-titlebar">
+                    <span class="win95-title">${badgesHTML}${displayName}</span>
+                    <button class="win95-close-btn" aria-label="Close">×</button>
+                </div>
+                <div class="win95-body">
+                    ${profilePicHTML}
+                    <div class="message-content">
+                        <span class="message-text">${contentHTML}</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            messageElement.classList.remove('theme-windows95');
+            messageElement.innerHTML = `
+                <img class="profile-pic" src="${fallbackUrl}" alt="${displayName}" />
+                <div class="message-content">
+                    <span class="username">${badgesHTML}${displayName}:</span>
+                    <span class="message-text">${contentHTML}</span>
+                </div>
+            `;
+            const usernameElement = messageElement.querySelector('.username');
+            if (usernameElement) {
+                usernameElement.style.color = userColor;
+            }
+        }
 
         this.container.appendChild(messageElement);
+
+        if (this.config.showProfilePics && this.twitchClient && this.twitchClient.clientId && this.twitchClient.accessToken) {
+            const picImg = messageElement.querySelector('.profile-pic');
+            const userId = tags['user-id'];
+            if (userId && picImg) {
+                this.fetchUserProfilePic(userId).then(url => {
+                    if (url) {
+                        picImg.src = url;
+                    }
+                }).catch(err => {
+                    console.error("Failed to fetch profile picture for user", userId, err);
+                });
+            }
+        }
 
         while (this.container.children.length > this.config.maxMessages) {
             this.container.removeChild(this.container.firstChild);
