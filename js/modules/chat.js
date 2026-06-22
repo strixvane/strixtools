@@ -29,7 +29,6 @@ class ChatModule {
             return;
         }
 
-        // Initialize with default fallback mock badges
         if (window.MOCK_BADGES) {
             this.badgesMap = JSON.parse(JSON.stringify(window.MOCK_BADGES));
         } else {
@@ -41,28 +40,40 @@ class ChatModule {
             return;
         }
 
-        try {
-            const channelName = this.config.twitchChannel;
-            if (!channelName) return;
+        const channelName = this.config.twitchChannel;
+        if (!channelName) return;
 
-            const channelUserId = await this.twitchClient.getChannelUserId(channelName);
-            if (!channelUserId) return;
+        window.statusManager?.show('Loading badges...', 'loading');
 
-            // Fetch global badges
-            const globalData = await this.twitchClient.getGlobalBadges();
-            if (globalData && globalData.data) {
-                this.parseBadges(globalData.data);
+        const maxRetries = 3;
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                const channelUserId = await this.twitchClient.getChannelUserId(channelName);
+                if (!channelUserId) return;
+
+                const globalData = await this.twitchClient.getGlobalBadges();
+                if (globalData && globalData.data) {
+                    this.parseBadges(globalData.data);
+                }
+
+                const channelData = await this.twitchClient.getChannelBadges(channelUserId);
+                if (channelData && channelData.data) {
+                    this.parseBadges(channelData.data);
+                }
+
+                console.log("Twitch badges loaded successfully.");
+                window.statusManager?.show('Badges loaded', 'success', 3000);
+                return;
+            } catch (err) {
+                console.error(`Failed to load Twitch badges (attempt ${attempt}/${maxRetries}):`, err);
+                if (attempt < maxRetries) {
+                    const delay = Math.pow(2, attempt) * 1000;
+                    window.statusManager?.show(`Badge retry in ${delay / 1000}s...`, 'warning');
+                    await new Promise(r => setTimeout(r, delay));
+                } else {
+                    window.statusManager?.show('Badge load failed. Check settings.', 'error');
+                }
             }
-
-            // Fetch channel-specific badges
-            const channelData = await this.twitchClient.getChannelBadges(channelUserId);
-            if (channelData && channelData.data) {
-                this.parseBadges(channelData.data);
-            }
-
-            console.log("Twitch badges loaded successfully.");
-        } catch (err) {
-            console.error("Failed to load Twitch badges:", err);
         }
     }
 
@@ -95,180 +106,9 @@ class ChatModule {
 
     applyStyles() {
         const settings = this.config;
-        const hexToRgba = (hex, opacityPercentage) => {
-            if (!hex || hex.length < 7) return 'rgba(0,0,0,1)';
-            let r = parseInt(hex.slice(1, 3), 16),
-                g = parseInt(hex.slice(3, 5), 16),
-                b = parseInt(hex.slice(5, 7), 16),
-                a = opacityPercentage / 100;
-            return `rgba(${r}, ${g}, ${b}, ${a})`;
-        };
-
-        const bgColorWithOpacity = hexToRgba(settings.pillboxBgColor, settings.pillboxOpacity);
-        const dynamicStyles = document.createElement('style');
-        dynamicStyles.id = 'chat-dynamic-styles';
-
-        const border = settings.borderWidth > 0 
-            ? `${settings.borderWidth}px ${settings.borderStyle} ${settings.borderColor}` 
-            : 'none';
-
-        const showProfilePics = settings.showProfilePics;
-
-        dynamicStyles.innerHTML = `
-            #chat-container { 
-                display: flex;
-                flex-direction: column;
-                gap: ${settings.messageGap}px; 
-            }
-            .chat-message {
-                background-color: ${bgColorWithOpacity};
-                border-radius: ${settings.pillboxRadius}px;
-                padding: ${settings.pillboxPadding};
-                border: ${border};
-                margin-bottom: 0;
-                display: ${showProfilePics ? 'flex' : 'block'};
-                align-items: center;
-                gap: 10px;
-            }
-            .profile-pic {
-                width: ${settings.profilePicSize}px;
-                height: ${settings.profilePicSize}px;
-                border-radius: ${settings.profilePicRadius}%;
-                flex-shrink: 0;
-                object-fit: cover;
-                display: ${showProfilePics ? 'block' : 'none'};
-            }
-            .message-content {
-                flex-grow: 1;
-                word-break: break-word;
-            }
-            .username {
-                font-family: ${settings.userFontFamily};
-                font-size: ${settings.userFontSize}px;
-                font-weight: ${settings.userFontWeight};
-                font-style: ${settings.userFontStyle};
-                text-transform: ${settings.userTextTransform};
-                letter-spacing: ${settings.userLetterSpacing}px;
-                text-shadow: ${settings.userShadowOffsetX || 1}px ${settings.userShadowOffsetY || 1}px ${settings.userShadowBlur}px ${settings.userShadowColor};
-            }
-            .message-text {
-                font-family: ${settings.msgFontFamily};
-                color: ${settings.msgColor};
-                font-size: ${settings.msgFontSize}px;
-                font-weight: ${settings.msgFontWeight};
-                font-style: ${settings.msgFontStyle};
-                letter-spacing: ${settings.msgLetterSpacing}px;
-                text-shadow: ${settings.msgShadowOffsetX || 1}px ${settings.msgShadowOffsetY || 1}px ${settings.msgShadowBlur}px ${settings.msgShadowColor};
-            }
-            .chat-badge {
-                display: inline-block;
-                vertical-align: middle;
-                height: 1em;
-                width: 1em;
-                margin-right: 0.2em;
-                border-radius: 2px;
-            }
-            .chat-badge:last-child {
-                margin-right: 0;
-            }
-            .badges-container {
-                display: inline-flex;
-                align-items: center;
-                margin-right: 0.3em;
-            }
-            .fade-out {
-                animation: fadeOut 0.5s forwards;
-            }
-            @keyframes fadeOut {
-                from { opacity: 1; }
-                to { opacity: 0; }
-            }
-
-            /* Windows 95 Theme */
-            .chat-message.theme-windows95 {
-                background-color: #c0c0c0 !important;
-                border-radius: 0px !important;
-                border: 2px solid !important;
-                border-color: #ffffff #808080 #808080 #ffffff !important;
-                padding: 2px !important;
-                display: flex !important;
-                flex-direction: column !important;
-                align-items: stretch !important;
-                gap: 0px !important;
-                box-shadow: none !important;
-                margin-bottom: 0px;
-            }
-            .win95-titlebar {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                background: #000080;
-                color: #ffffff;
-                padding: 3px 4px;
-                margin-bottom: 2px;
-                user-select: none;
-            }
-            .win95-title {
-                font-family: "MS Sans Serif", Tahoma, Geneva, sans-serif;
-                font-size: 11px;
-                font-weight: bold;
-                color: #ffffff !important;
-                text-shadow: none !important;
-                text-transform: none !important;
-                letter-spacing: 0px !important;
-                display: flex;
-                align-items: center;
-                gap: 4px;
-            }
-            .win95-close-btn {
-                font-family: "MS Sans Serif", Tahoma, Geneva, sans-serif;
-                font-size: 9px;
-                font-weight: bold;
-                width: 16px;
-                height: 14px;
-                background-color: #c0c0c0;
-                color: #000000;
-                border: 1px solid;
-                border-color: #ffffff #5a5a5a #5a5a5a #ffffff;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 0;
-                margin: 0;
-                cursor: pointer;
-            }
-            .win95-close-btn:active {
-                border-color: #5a5a5a #ffffff #ffffff #5a5a5a;
-                padding: 1px 0 0 1px;
-            }
-            .win95-body {
-                background-color: #ffffff;
-                border: 2px solid;
-                border-color: #808080 #ffffff #ffffff #808080;
-                padding: 6px 8px;
-                color: #000000;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-            .theme-windows95 .profile-pic {
-                border-radius: 0px !important;
-                border: 1px solid #808080 !important;
-            }
-            .theme-windows95 .message-text {
-                font-family: "MS Sans Serif", Tahoma, Geneva, sans-serif !important;
-                color: #000000 !important;
-                text-shadow: none !important;
-                font-size: 12px !important;
-                font-weight: normal !important;
-                font-style: normal !important;
-                letter-spacing: 0px !important;
-            }
-        `;
-        
-        const existing = document.getElementById('chat-dynamic-styles');
-        if (existing) existing.remove();
-        document.head.appendChild(dynamicStyles);
+        const chatCss = window.buildChatCSS(settings);
+        const containerCss = `#chat-container { display: flex; flex-direction: column; gap: ${settings.messageGap}px; }`;
+        window.injectStyles('chat-dynamic-styles', containerCss + '\n' + chatCss);
     }
 
     async fetchUserProfilePic(userId) {
@@ -349,7 +189,7 @@ class ChatModule {
                     if (!fetchedIds.has(id)) {
                         const resolvers = this.pendingUserResolvers[id];
                         if (resolvers) {
-                            resolvers.forEach(resolve => resolve('assets/default-avatar.png'));
+                            resolvers.forEach(resolve => resolve('assets/default-avatar.svg'));
                             delete this.pendingUserResolvers[id];
                         }
                     }
@@ -359,7 +199,7 @@ class ChatModule {
                 for (const id of chunk) {
                     const resolvers = this.pendingUserResolvers[id];
                     if (resolvers) {
-                        resolvers.forEach(resolve => resolve('assets/default-avatar.png'));
+                        resolvers.forEach(resolve => resolve('assets/default-avatar.svg'));
                         delete this.pendingUserResolvers[id];
                     }
                 }
@@ -367,7 +207,7 @@ class ChatModule {
         }
     }
 
-    async handleMessage(channel, tags, message, self) {
+    async handleMessage(_channel, tags, message, _self) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('chat-message');
 
@@ -395,16 +235,21 @@ class ChatModule {
             }
         }
 
-        const fallbackUrl = 'assets/default-avatar.png';
+        const fallbackUrl = 'assets/default-avatar.svg';
         const profilePicHTML = this.config.showProfilePics
             ? `<img class="profile-pic" src="${fallbackUrl}" alt="${displayName}" />`
             : '';
 
-        if (this.config.theme === 'windows95') {
-            messageElement.classList.add('theme-windows95');
+        const isWin95 = this.config.theme === 'windows95';
+        const isPowerline = this.config.theme === 'powerline';
+
+        messageElement.classList.toggle('theme-windows95', isWin95);
+        messageElement.classList.toggle('theme-powerline', isPowerline);
+
+        if (isWin95) {
             messageElement.innerHTML = `
                 <div class="win95-titlebar">
-                    <span class="win95-title">${badgesHTML}${displayName}</span>
+                    <span class="win95-title">${badgesHTML}<span class="username-text"></span></span>
                     <button class="win95-close-btn" aria-label="Close">×</button>
                 </div>
                 <div class="win95-body">
@@ -414,33 +259,63 @@ class ChatModule {
                     </div>
                 </div>
             `;
+            const titleEl = messageElement.querySelector('.win95-title .username-text');
+            if (titleEl) titleEl.textContent = displayName;
+        } else if (isPowerline) {
+            const avatarContent = this.config.showProfilePics
+                ? `<img class="user-avatar" src="${fallbackUrl}" alt="${displayName}" />`
+                : '<span class="term-icon">&gt;</span>';
+            messageElement.innerHTML = `
+                <div class="powerline-header">
+                    <div class="term-segment avatar-segment">
+                        ${avatarContent}${badgesHTML}
+                    </div>
+                    <div class="term-segment user-segment">
+                        <span class="username"><span class="username-text"></span></span>
+                        <span class="path-tilde">~</span>
+                    </div>
+                    <div class="term-segment spacer-segment"></div>
+                </div>
+                <span class="message-text">${contentHTML}<span class="cursor-blink">_</span></span>
+            `;
+            const usernameElement = messageElement.querySelector('.username');
+            if (usernameElement) {
+                usernameElement.style.color = userColor;
+                const nameEl = usernameElement.querySelector('.username-text');
+                if (nameEl) {
+                    nameEl.textContent = displayName;
+                    nameEl.setAttribute('aria-label', displayName);
+                }
+            }
         } else {
-            messageElement.classList.remove('theme-windows95');
             messageElement.innerHTML = `
                 <img class="profile-pic" src="${fallbackUrl}" alt="${displayName}" />
                 <div class="message-content">
-                    <span class="username">${badgesHTML}${displayName}:</span>
+                    <span class="username">${badgesHTML}<span class="username-text"></span>:</span>
                     <span class="message-text">${contentHTML}</span>
                 </div>
             `;
             const usernameElement = messageElement.querySelector('.username');
             if (usernameElement) {
                 usernameElement.style.color = userColor;
+                const nameEl = usernameElement.querySelector('.username-text');
+                if (nameEl) {
+                    nameEl.textContent = displayName;
+                }
             }
         }
 
         this.container.appendChild(messageElement);
 
         if (this.config.showProfilePics && this.twitchClient && this.twitchClient.clientId && this.twitchClient.accessToken) {
-            const picImg = messageElement.querySelector('.profile-pic');
+            const avatarSelector = isPowerline ? '.user-avatar' : '.profile-pic';
+            const picImg = messageElement.querySelector(avatarSelector);
             const userId = tags['user-id'];
             if (userId && picImg) {
                 this.fetchUserProfilePic(userId).then(url => {
                     if (url) {
                         picImg.src = url;
                     }
-                }).catch(err => {
-                    console.error("Failed to fetch profile picture for user", userId, err);
                 });
             }
         }
@@ -462,4 +337,87 @@ class ChatModule {
     }
 }
 
+function applyWindows95Styles(msg, settings) {
+    msg.style.backgroundColor = '#c0c0c0';
+    msg.style.borderRadius = '0px';
+    msg.style.padding = '2px';
+    msg.style.border = '2px solid';
+    msg.style.borderColor = '#ffffff #808080 #808080 #ffffff';
+    msg.style.display = 'flex';
+    msg.style.flexDirection = 'column';
+    msg.style.alignItems = 'stretch';
+    msg.style.gap = '0px';
+
+    const titlebar = msg.querySelector('.win95-titlebar');
+    const title = msg.querySelector('.win95-title');
+    const closeBtn = msg.querySelector('.win95-close-btn');
+    const win95Body = msg.querySelector('.win95-body');
+    const pic = msg.querySelector('.profile-pic');
+    const msgText = msg.querySelector('.message-text');
+
+    if (titlebar) {
+        titlebar.style.display = 'flex';
+        titlebar.style.alignItems = 'center';
+        titlebar.style.justifyContent = 'space-between';
+        titlebar.style.backgroundColor = '#000080';
+        titlebar.style.color = '#ffffff';
+        titlebar.style.padding = '3px 4px';
+        titlebar.style.marginBottom = '2px';
+    }
+    if (title) {
+        title.style.fontFamily = '"MS Sans Serif", Tahoma, Geneva, sans-serif';
+        title.style.fontSize = '11px';
+        title.style.fontWeight = 'bold';
+        title.style.color = '#ffffff';
+        title.style.textShadow = 'none';
+        title.style.textTransform = 'none';
+        title.style.letterSpacing = '0px';
+    }
+    if (closeBtn) {
+        closeBtn.style.fontFamily = '"MS Sans Serif", Tahoma, Geneva, sans-serif';
+        closeBtn.style.fontSize = '9px';
+        closeBtn.style.fontWeight = 'bold';
+        closeBtn.style.width = '16px';
+        closeBtn.style.height = '14px';
+        closeBtn.style.backgroundColor = '#c0c0c0';
+        closeBtn.style.color = '#000000';
+        closeBtn.style.border = '1px solid';
+        closeBtn.style.borderColor = '#ffffff #5a5a5a #5a5a5a #ffffff';
+        closeBtn.style.display = 'flex';
+        closeBtn.style.alignItems = 'center';
+        closeBtn.style.justifyContent = 'center';
+        closeBtn.style.padding = '0';
+        closeBtn.style.margin = '0';
+    }
+    if (win95Body) {
+        win95Body.style.backgroundColor = '#ffffff';
+        win95Body.style.border = '2px solid';
+        win95Body.style.borderColor = '#808080 #ffffff #ffffff #808080';
+        win95Body.style.padding = '6px 8px';
+        win95Body.style.color = '#000000';
+        win95Body.style.display = 'flex';
+        win95Body.style.alignItems = 'center';
+        win95Body.style.gap = '8px';
+    }
+    if (pic) {
+        pic.style.width = settings.chat.profilePicSize + 'px';
+        pic.style.height = settings.chat.profilePicSize + 'px';
+        pic.style.borderRadius = '0px';
+        pic.style.border = '1px solid #808080';
+        pic.style.flexShrink = '0';
+        pic.style.objectFit = 'cover';
+        pic.style.display = settings.chat.showProfilePics ? 'block' : 'none';
+    }
+    if (msgText) {
+        msgText.style.fontFamily = '"MS Sans Serif", Tahoma, Geneva, sans-serif';
+        msgText.style.color = '#000000';
+        msgText.style.textShadow = 'none';
+        msgText.style.fontSize = '12px';
+        msgText.style.fontWeight = 'normal';
+        msgText.style.fontStyle = 'normal';
+        msgText.style.letterSpacing = '0px';
+    }
+}
+
 window.ChatModule = ChatModule;
+window.applyWindows95Styles = applyWindows95Styles;

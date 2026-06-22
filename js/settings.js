@@ -1,111 +1,152 @@
 
-function hexToRgba(hex, opacityPercentage) {
-    if (!hex || hex === 'transparent') return 'transparent';
-    if (hex.length < 7) return 'rgba(0,0,0,1)';
-    let r = parseInt(hex.slice(1, 3), 16),
-        g = parseInt(hex.slice(3, 5), 16),
-        b = parseInt(hex.slice(5, 7), 16),
-        a = opacityPercentage / 100;
-    return `rgba(${r}, ${g}, ${b}, ${a})`;
-}
-
 const STORAGE_KEY = 'strixTools_settings';
 const TEST_NAMES = ["ChristheClown_", "Celest_VT_", "Popcorb_", "xxstargazorxx", "finojalapeno", "omnomagonvt", "SpecterJesterVT", "Onihiko_VT", "Neoeva122"];
 const eventTimeouts = {};
 
-const getSettings = () => {
-    const getValue = (id, defaultValue = '') => document.getElementById(id)?.value || defaultValue;
-    const getInt = (id, defaultValue = 0) => {
-        const val = parseInt(document.getElementById(id)?.value);
-        return isNaN(val) ? defaultValue : val;
-    };
-    const getBool = (id, defaultValue = false) => {
-        const el = document.getElementById(id);
-        return el ? el.checked : defaultValue;
-    };
-
-    const defaults = window.DEFAULT_SETTINGS || { general: {}, chat: {}, events: {} };
-
-    return {
-        general: {
-            twitchChannel: getValue('twitchChannel', defaults.general.twitchChannel),
-            clientId: getValue('clientId', defaults.general.clientId),
-            accessToken: getValue('accessToken', defaults.general.accessToken)
-        },
-        chat: {
-            theme: getValue('chatTheme', defaults.chat.theme),
-            showBadges: getBool('showBadges', defaults.chat.showBadges),
-            showProfilePics: getBool('showProfilePics', defaults.chat.showProfilePics),
-            profilePicSize: getInt('profilePicSize', defaults.chat.profilePicSize),
-            profilePicRadius: getInt('profilePicRadius', defaults.chat.profilePicRadius),
-            maxMessages: getInt('maxMessages', defaults.chat.maxMessages),
-            messageLifetimeMs: getInt('messageLifetime', defaults.chat.messageLifetimeMs),
-            pillboxBgColor: getValue('pillboxBgColor', defaults.chat.pillboxBgColor),
-            pillboxOpacity: getInt('pillboxOpacity', defaults.chat.pillboxOpacity),
-            pillboxRadius: getInt('pillboxRadius', defaults.chat.pillboxRadius),
-            pillboxPadding: getValue('pillboxPadding', defaults.chat.pillboxPadding),
-            messageGap: getInt('messageGap', defaults.chat.messageGap),
-            userFontFamily: getValue('userFontFamily', defaults.chat.userFontFamily),
-            userFontSize: getInt('userFontSize', defaults.chat.userFontSize),
-            userFontWeight: getValue('userFontWeight', defaults.chat.userFontWeight),
-            userFontStyle: getValue('userFontStyle', defaults.chat.userFontStyle),
-            userTextTransform: getValue('userTextTransform', defaults.chat.userTextTransform),
-            userLetterSpacing: getInt('userLetterSpacing', defaults.chat.userLetterSpacing),
-            userShadowColor: getValue('userShadowColor', defaults.chat.userShadowColor),
-            userShadowBlur: getInt('userShadowBlur', defaults.chat.userShadowBlur),
-            userShadowOffsetX: getInt('userShadowOffsetX', defaults.chat.userShadowOffsetX),
-            userShadowOffsetY: getInt('userShadowOffsetY', defaults.chat.userShadowOffsetY),
-            msgFontFamily: getValue('msgFontFamily', defaults.chat.msgFontFamily),
-            msgColor: getValue('msgColor', defaults.chat.msgColor),
-            msgFontSize: getInt('msgFontSize', defaults.chat.msgFontSize),
-            msgFontWeight: getValue('msgFontWeight', defaults.chat.msgFontWeight),
-            msgFontStyle: getValue('msgFontStyle', defaults.chat.msgFontStyle),
-            msgLetterSpacing: getInt('msgLetterSpacing', defaults.chat.msgLetterSpacing),
-            msgShadowColor: getValue('msgShadowColor', defaults.chat.msgShadowColor),
-            msgShadowBlur: getInt('msgShadowBlur', defaults.chat.msgShadowBlur),
-            msgShadowOffsetX: getInt('msgShadowOffsetX', defaults.chat.msgShadowOffsetX),
-            msgShadowOffsetY: getInt('msgShadowOffsetY', defaults.chat.msgShadowOffsetY),
-            borderWidth: getInt('chatBorderWidth', defaults.chat.borderWidth),
-            borderStyle: getValue('chatBorderStyle', defaults.chat.borderStyle),
-            borderColor: getValue('chatBorderColor', defaults.chat.borderColor)
-        },
-        events: {
-            fontFamily: getValue('eventFontFamily', defaults.events.fontFamily),
-            fontSize: getInt('eventFontSize', defaults.events.fontSize),
-            fontWeight: getValue('eventFontWeight', defaults.events.fontWeight),
-            fontStyle: getValue('eventFontStyle', defaults.events.fontStyle),
-            textDecoration: getValue('eventTextDecoration', defaults.events.textDecoration),
-            textTransform: getValue('eventTextTransform', defaults.events.textTransform),
-            kerning: getInt('eventKerning', defaults.events.kerning),
-            textColor: getValue('eventTextColor', defaults.events.textColor),
-            labelColor: getValue('eventLabelColor', defaults.events.labelColor),
-            shadowColor: getValue('eventShadowColor', defaults.events.shadowColor),
-            shadowX: getInt('eventShadowX', defaults.events.shadowX),
-            shadowY: getInt('eventShadowY', defaults.events.shadowY),
-            shadowBlur: getInt('eventShadowBlur', defaults.events.shadowBlur),
-            layout: getValue('eventLayout', defaults.events.layout),
-            spacing: getInt('eventSpacing', defaults.events.spacing),
-            padding: getValue('eventPadding', defaults.events.padding),
-            orientation: getValue('eventOrientation', defaults.events.orientation),
-            labelPosition: getValue('eventLabelPosition', defaults.events.labelPosition),
-            bgColor: getValue('eventBgColor', defaults.events.bgColor),
-            bgOpacity: getInt('eventBgOpacity', defaults.events.bgOpacity),
-            borderRadius: getInt('eventBorderRadius', defaults.events.borderRadius),
-            borderWidth: getInt('eventBorderWidth', defaults.events.borderWidth),
-            borderStyle: getValue('eventBorderStyle', defaults.events.borderStyle),
-            borderColor: getValue('eventBorderColor', defaults.events.borderColor),
-            highlightColor: getValue('eventHighlightColor', defaults.events.highlightColor),
-            highlightDurationMs: getInt('eventHighlightDuration', defaults.events.highlightDurationMs)
-        }
+const debounce = (fn, delay) => {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
     };
 };
 
-const syncChannel = new BroadcastChannel('strixtools_sync');
+const THEME_ACCENT_COLORS = {
+    default: '#000000',
+    windows95: '#000080',
+    powerline: '#e84364'
+};
+
+function syncAccentColor() {
+    const themeEl = document.getElementById('chatTheme');
+    const colorEl = document.getElementById('chatAccentColor');
+    if (!themeEl || !colorEl) return;
+    const color = THEME_ACCENT_COLORS[themeEl.value];
+    if (color) {
+        colorEl.value = color;
+    }
+}
+
+const SETTINGS_FIELDS = {
+    general: [
+        { id: 'twitchChannel', key: 'twitchChannel' },
+        { id: 'clientId', key: 'clientId' },
+        { id: 'accessToken', key: 'accessToken' }
+    ],
+    chat: [
+        { id: 'chatTheme', key: 'theme' },
+        { id: 'showBadges', key: 'showBadges', type: 'bool' },
+        { id: 'showProfilePics', key: 'showProfilePics', type: 'bool' },
+        { id: 'profilePicSize', key: 'profilePicSize' },
+        { id: 'profilePicRadius', key: 'profilePicRadius' },
+        { id: 'maxMessages', key: 'maxMessages' },
+        { id: 'messageLifetime', key: 'messageLifetimeMs' },
+        { id: 'pillboxBgColor', key: 'pillboxBgColor' },
+        { id: 'pillboxOpacity', key: 'pillboxOpacity' },
+        { id: 'pillboxRadius', key: 'pillboxRadius' },
+        { id: 'pillboxPadding', key: 'pillboxPadding' },
+        { id: 'messageGap', key: 'messageGap' },
+        { id: 'userFontFamily', key: 'userFontFamily' },
+        { id: 'userFontSize', key: 'userFontSize' },
+        { id: 'userFontWeight', key: 'userFontWeight', type: 'string' },
+        { id: 'userFontStyle', key: 'userFontStyle' },
+        { id: 'userTextTransform', key: 'userTextTransform' },
+        { id: 'userLetterSpacing', key: 'userLetterSpacing' },
+        { id: 'userShadowColor', key: 'userShadowColor' },
+        { id: 'userShadowBlur', key: 'userShadowBlur' },
+        { id: 'userShadowOffsetX', key: 'userShadowOffsetX' },
+        { id: 'userShadowOffsetY', key: 'userShadowOffsetY' },
+        { id: 'msgFontFamily', key: 'msgFontFamily' },
+        { id: 'msgColor', key: 'msgColor' },
+        { id: 'msgFontSize', key: 'msgFontSize' },
+        { id: 'msgFontWeight', key: 'msgFontWeight' },
+        { id: 'msgFontStyle', key: 'msgFontStyle' },
+        { id: 'msgLetterSpacing', key: 'msgLetterSpacing' },
+        { id: 'msgShadowColor', key: 'msgShadowColor' },
+        { id: 'msgShadowBlur', key: 'msgShadowBlur' },
+        { id: 'msgShadowOffsetX', key: 'msgShadowOffsetX' },
+        { id: 'msgShadowOffsetY', key: 'msgShadowOffsetY' },
+        { id: 'chatAccentColor', key: 'accentColor' },
+        { id: 'chatBorderWidth', key: 'borderWidth' },
+        { id: 'chatBorderStyle', key: 'borderStyle' },
+        { id: 'chatBorderColor', key: 'borderColor' }
+    ],
+    events: [
+        { id: 'eventFontFamily', key: 'fontFamily' },
+        { id: 'eventFontSize', key: 'fontSize' },
+        { id: 'eventFontWeight', key: 'fontWeight', type: 'string' },
+        { id: 'eventFontStyle', key: 'fontStyle' },
+        { id: 'eventTextTransform', key: 'textTransform' },
+        { id: 'eventTextDecoration', key: 'textDecoration' },
+        { id: 'eventKerning', key: 'kerning' },
+        { id: 'eventTextColor', key: 'textColor' },
+        { id: 'eventLabelColor', key: 'labelColor' },
+        { id: 'eventShadowColor', key: 'shadowColor' },
+        { id: 'eventShadowX', key: 'shadowX' },
+        { id: 'eventShadowY', key: 'shadowY' },
+        { id: 'eventShadowBlur', key: 'shadowBlur' },
+        { id: 'eventLayout', key: 'layout' },
+        { id: 'eventSpacing', key: 'spacing' },
+        { id: 'eventPadding', key: 'padding' },
+        { id: 'eventOrientation', key: 'orientation' },
+        { id: 'eventLabelPosition', key: 'labelPosition' },
+        { id: 'eventBgColor', key: 'bgColor' },
+        { id: 'eventBgOpacity', key: 'bgOpacity' },
+        { id: 'eventBorderRadius', key: 'borderRadius' },
+        { id: 'eventBorderWidth', key: 'borderWidth' },
+        { id: 'eventBorderStyle', key: 'borderStyle' },
+        { id: 'eventBorderColor', key: 'borderColor' },
+        { id: 'eventHighlightColor', key: 'highlightColor' },
+        { id: 'eventHighlightDuration', key: 'highlightDurationMs' }
+    ]
+};
+
+const applySettingsToDOM = (settings, defaults) => {
+    Object.entries(SETTINGS_FIELDS).forEach(([section, fields]) => {
+        const s = settings[section];
+        const d = defaults[section];
+        if (!s || !d) return;
+        fields.forEach(({ id, key, type }) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const val = s[key] !== undefined ? s[key] : d[key];
+            if (type === 'bool') el.checked = val;
+            else el.value = val;
+        });
+    });
+};
+
+const getSettings = () => {
+    const defaults = window.DEFAULT_SETTINGS || { general: {}, chat: {}, events: {} };
+    const settings = {};
+    Object.entries(SETTINGS_FIELDS).forEach(([section, fields]) => {
+        settings[section] = {};
+        fields.forEach(({ id, key, type }) => {
+            const el = document.getElementById(id);
+            const def = defaults[section]?.[key];
+            if (!el) { settings[section][key] = def; return; }
+            const t = type || (typeof def === 'boolean' ? 'bool' : typeof def === 'number' ? 'int' : 'string');
+            if (t === 'bool') {
+                settings[section][key] = el.checked;
+            } else if (t === 'int') {
+                const v = parseInt(el.value, 10);
+                settings[section][key] = isNaN(v) ? def : v;
+            } else {
+                settings[section][key] = el.value || def || '';
+            }
+        });
+    });
+    return settings;
+};
+
+const syncChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('strixtools_sync') : null;
 
 const saveToLocalStorage = () => {
     const settings = getSettings();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    syncChannel.postMessage({ type: 'update', settings });
+    if (syncChannel) {
+        syncChannel.postMessage({ type: 'update', settings });
+    }
 };
 
 const loadFromLocalStorage = () => {
@@ -114,92 +155,9 @@ const loadFromLocalStorage = () => {
 
     try {
         const settings = JSON.parse(saved);
-        const defaults = window.DEFAULT_SETTINGS;
-
-        const setVal = (id, val, defaultVal) => {
-            const el = document.getElementById(id);
-            if (el) el.value = (val !== undefined) ? val : defaultVal;
-        };
-        const setBool = (id, val, defaultVal) => {
-            const el = document.getElementById(id);
-            if (el) el.checked = (val !== undefined) ? val : defaultVal;
-        };
-
-        if (settings.general) {
-            setVal('twitchChannel', settings.general.twitchChannel, defaults.general.twitchChannel);
-            setVal('clientId', settings.general.clientId, defaults.general.clientId);
-            setVal('accessToken', settings.general.accessToken, defaults.general.accessToken);
-        }
-
-        if (settings.chat) {
-            const c = settings.chat;
-            const d = defaults.chat;
-            setVal('chatTheme', c.theme, d.theme);
-            setBool('showBadges', c.showBadges, d.showBadges);
-            setBool('showProfilePics', c.showProfilePics, d.showProfilePics);
-            setVal('profilePicSize', c.profilePicSize, d.profilePicSize);
-            setVal('profilePicRadius', c.profilePicRadius, d.profilePicRadius);
-            setVal('maxMessages', c.maxMessages, d.maxMessages);
-            setVal('messageLifetime', c.messageLifetimeMs, d.messageLifetimeMs);
-            setVal('pillboxBgColor', c.pillboxBgColor, d.pillboxBgColor);
-            setVal('pillboxOpacity', c.pillboxOpacity, d.pillboxOpacity);
-            setVal('pillboxRadius', c.pillboxRadius, d.pillboxRadius);
-            setVal('pillboxPadding', c.pillboxPadding, d.pillboxPadding);
-            setVal('messageGap', c.messageGap, d.messageGap);
-            setVal('userFontFamily', c.userFontFamily, d.userFontFamily);
-            setVal('userFontSize', c.userFontSize, d.userFontSize);
-            setVal('userFontWeight', c.userFontWeight, d.userFontWeight);
-            setVal('userFontStyle', c.userFontStyle, d.userFontStyle);
-            setVal('userTextTransform', c.userTextTransform, d.userTextTransform);
-            setVal('userLetterSpacing', c.userLetterSpacing, d.userLetterSpacing);
-            setVal('userShadowColor', c.userShadowColor, d.userShadowColor);
-            setVal('userShadowBlur', c.userShadowBlur, d.userShadowBlur);
-            setVal('userShadowOffsetX', c.userShadowOffsetX, d.userShadowOffsetX);
-            setVal('userShadowOffsetY', c.userShadowOffsetY, d.userShadowOffsetY);
-            setVal('msgFontFamily', c.msgFontFamily, d.msgFontFamily);
-            setVal('msgColor', c.msgColor, d.msgColor);
-            setVal('msgFontSize', c.msgFontSize, d.msgFontSize);
-            setVal('msgFontWeight', c.msgFontWeight, d.msgFontWeight);
-            setVal('msgFontStyle', c.msgFontStyle, d.msgFontStyle);
-            setVal('msgLetterSpacing', c.msgLetterSpacing, d.msgLetterSpacing);
-            setVal('msgShadowColor', c.msgShadowColor, d.msgShadowColor);
-            setVal('msgShadowBlur', c.msgShadowBlur, d.msgShadowBlur);
-            setVal('msgShadowOffsetX', c.msgShadowOffsetX, d.msgShadowOffsetX);
-            setVal('msgShadowOffsetY', c.msgShadowOffsetY, d.msgShadowOffsetY);
-            setVal('chatBorderWidth', c.borderWidth, d.borderWidth);
-            setVal('chatBorderStyle', c.borderStyle, d.borderStyle);
-            setVal('chatBorderColor', c.borderColor, d.borderColor);
-        }
-
-        if (settings.events) {
-            const e = settings.events;
-            const d = defaults.events;
-            setVal('eventFontFamily', e.fontFamily, d.fontFamily);
-            setVal('eventFontSize', e.fontSize, d.fontSize);
-            setVal('eventFontWeight', e.fontWeight, d.fontWeight);
-            setVal('eventFontStyle', e.fontStyle, d.fontStyle);
-            setVal('eventTextTransform', e.textTransform, d.textTransform);
-            setVal('eventKerning', e.kerning, d.kerning);
-            setVal('eventTextColor', e.textColor, d.textColor);
-            setVal('eventLabelColor', e.labelColor, d.labelColor);
-            setVal('eventShadowColor', e.shadowColor, d.shadowColor);
-            setVal('eventShadowX', e.shadowX, d.shadowX);
-            setVal('eventShadowY', e.shadowY, d.shadowY);
-            setVal('eventShadowBlur', e.shadowBlur, d.shadowBlur);
-            setVal('eventLayout', e.layout, d.layout);
-            setVal('eventSpacing', e.spacing, d.spacing);
-            setVal('eventPadding', e.padding, d.padding);
-            setVal('eventOrientation', e.orientation, d.orientation);
-            setVal('eventLabelPosition', e.labelPosition, d.labelPosition);
-            setVal('eventBgColor', e.bgColor, d.bgColor);
-            setVal('eventBgOpacity', e.bgOpacity, d.bgOpacity);
-            setVal('eventBorderRadius', e.borderRadius, d.borderRadius);
-            setVal('eventBorderWidth', e.borderWidth, d.borderWidth);
-            setVal('eventBorderStyle', e.borderStyle, d.borderStyle);
-            setVal('eventBorderColor', e.borderColor, d.borderColor);
-            setVal('eventHighlightColor', e.highlightColor, d.highlightColor);
-            setVal('eventHighlightDuration', e.highlightDurationMs, d.highlightDurationMs);
-        }
+        // migrate legacy theme names
+        if (settings.chat?.theme === 'spacepunk') settings.chat.theme = 'powerline';
+        applySettingsToDOM(settings, window.DEFAULT_SETTINGS);
     } catch (e) {
         console.error("Failed to load settings from localStorage", e);
     }
@@ -210,71 +168,22 @@ const updatePreview = () => {
     const previewBox = document.getElementById('preview-box');
     if (!previewBox) return;
 
+    window.setEventCSSVariables(previewBox, settings.events);
+    const eventCss = window.buildEventCSS(settings.events, '#events-preview');
+    const chatCss = window.buildChatCSS(settings.chat);
+    const previewCss = `#chat-preview { display: flex; flex-direction: column; justify-content: flex-end; flex-grow: 1; gap: ${settings.chat.messageGap}px; }`;
+    window.injectStyles('preview-dynamic-styles', eventCss + '\n' + chatCss + '\n' + previewCss);
+
     const eventsPreview = document.getElementById('events-preview');
     if (eventsPreview) {
-        eventsPreview.style.fontFamily = settings.events.fontFamily;
-        eventsPreview.style.fontSize = settings.events.fontSize + 'px';
-        eventsPreview.style.fontWeight = settings.events.fontWeight;
-        eventsPreview.style.fontStyle = settings.events.fontStyle;
-        eventsPreview.style.color = settings.events.textColor;
-        eventsPreview.style.textTransform = settings.events.textTransform;
-        eventsPreview.style.textDecoration = settings.events.textDecoration;
-        eventsPreview.style.letterSpacing = settings.events.kerning + 'px';
-        eventsPreview.style.textShadow = `${settings.events.shadowX}px ${settings.events.shadowY}px ${settings.events.shadowBlur}px ${settings.events.shadowColor}`;
-
-        const labels = eventsPreview.querySelectorAll('.label');
-        labels.forEach(l => l.style.color = settings.events.labelColor);
-
-        if (settings.events.layout === 'horizontal') {
-            eventsPreview.style.display = 'flex';
-            eventsPreview.style.gap = settings.events.spacing + 'px';
-        } else {
-            eventsPreview.style.display = 'block';
-        }
-
         const eventContainers = eventsPreview.querySelectorAll('.event-container');
-        const bgColor = hexToRgba(settings.events.bgColor, settings.events.bgOpacity);
-        const border = settings.events.borderWidth > 0
-            ? `${settings.events.borderWidth}px ${settings.events.borderStyle} ${settings.events.borderColor}`
-            : 'none';
-
         eventContainers.forEach(c => {
             c.style.margin = settings.events.layout === 'vertical' ? `${settings.events.spacing}px 0` : '0';
-            c.style.backgroundColor = bgColor;
-            c.style.border = border;
-            c.style.borderRadius = settings.events.borderRadius + 'px';
-            c.style.padding = settings.events.padding;
-
-            if (settings.events.orientation === 'stacked') {
-                c.style.display = 'flex';
-                c.style.flexDirection = 'column';
-                c.style.alignItems = 'flex-start';
-            } else {
-                c.style.display = 'flex';
-                c.style.flexDirection = 'row';
-                c.style.alignItems = 'center';
-                c.style.gap = '8px';
-            }
-
-            if (settings.events.labelPosition === 'after') {
-                c.style.flexDirection = settings.events.orientation === 'stacked' ? 'column-reverse' : 'row-reverse';
-            }
         });
     }
 
     const chatPreview = document.getElementById('chat-preview');
     if (chatPreview) {
-        chatPreview.style.display = 'flex';
-        chatPreview.style.flexDirection = 'column';
-        chatPreview.style.justifyContent = 'flex-end';
-        chatPreview.style.flexGrow = '1';
-        chatPreview.style.gap = settings.chat.messageGap + 'px';
-
-        const bgColorWithOpacity = hexToRgba(settings.chat.pillboxBgColor, settings.chat.pillboxOpacity);
-        const border = settings.chat.borderWidth > 0
-            ? `${settings.chat.borderWidth}px ${settings.chat.borderStyle} ${settings.chat.borderColor}`
-            : 'none';
-
         const messages = chatPreview.querySelectorAll('.chat-message');
         messages.forEach(msg => {
             let username = msg.getAttribute('data-username');
@@ -289,6 +198,12 @@ const updatePreview = () => {
                     msg.setAttribute('data-username', username);
                     userColor = usernameEl.style.color || '#9146FF';
                     msg.setAttribute('data-usercolor', userColor);
+                } else {
+                    const titleEl = msg.querySelector('.win95-title');
+                    if (titleEl) {
+                        username = titleEl.textContent.trim();
+                        msg.setAttribute('data-username', username);
+                    }
                 }
             }
             if (!messageText) {
@@ -299,8 +214,8 @@ const updatePreview = () => {
                 }
             }
 
-            // Rebuild elements
             msg.innerHTML = '';
+            msg.style.cssText = '';
 
             let badgesHTML = '';
             if (settings.chat.showBadges && badgesAttr) {
@@ -319,13 +234,14 @@ const updatePreview = () => {
                 }
             }
 
-            const fallbackUrl = 'assets/default-avatar.png';
+            const fallbackUrl = 'assets/default-avatar.svg';
             const profilePicHTML = settings.chat.showProfilePics
                 ? `<img class="profile-pic" src="${fallbackUrl}" alt="${username}" />`
                 : '';
 
             if (settings.chat.theme === 'windows95') {
                 msg.classList.add('theme-windows95');
+                msg.classList.remove('theme-powerline');
                 msg.innerHTML = `
                     <div class="win95-titlebar">
                         <span class="win95-title">${badgesHTML}${username}</span>
@@ -339,88 +255,40 @@ const updatePreview = () => {
                     </div>
                 `;
 
-                // Set inline styles for Windows 95
-                msg.style.backgroundColor = '#c0c0c0';
-                msg.style.borderRadius = '0px';
-                msg.style.padding = '2px';
-                msg.style.border = '2px solid';
-                msg.style.borderColor = '#ffffff #808080 #808080 #ffffff';
-                msg.style.display = 'flex';
-                msg.style.flexDirection = 'column';
-                msg.style.alignItems = 'stretch';
-                msg.style.gap = '0px';
+                window.applyWindows95Styles(msg, settings);
+            } else if (settings.chat.theme === 'powerline') {
+                msg.classList.remove('theme-windows95');
+                msg.classList.add('theme-powerline');
 
-                const titlebar = msg.querySelector('.win95-titlebar');
-                const title = msg.querySelector('.win95-title');
-                const closeBtn = msg.querySelector('.win95-close-btn');
-                const win95Body = msg.querySelector('.win95-body');
-                const pic = msg.querySelector('.profile-pic');
-                const msgText = msg.querySelector('.message-text');
+                const avatarContent = settings.chat.showProfilePics
+                    ? `<img class="user-avatar" src="${fallbackUrl}" alt="${username}" />`
+                    : '<span class="term-icon">&gt;</span>';
 
-                if (titlebar) {
-                    titlebar.style.display = 'flex';
-                    titlebar.style.alignItems = 'center';
-                    titlebar.style.justifyContent = 'space-between';
-                    titlebar.style.backgroundColor = '#000080';
-                    titlebar.style.color = '#ffffff';
-                    titlebar.style.padding = '3px 4px';
-                    titlebar.style.marginBottom = '2px';
+                msg.innerHTML = `
+                    <div class="powerline-header">
+                        <div class="term-segment avatar-segment">
+                            ${avatarContent}${badgesHTML}
+                        </div>
+                        <div class="term-segment user-segment">
+                            <span class="username"><span class="username-text">${username}</span></span>
+                            <span class="path-tilde">~</span>
+                        </div>
+                        <div class="term-segment spacer-segment"></div>
+                    </div>
+                    <span class="message-text">${messageText}<span class="cursor-blink">_</span></span>
+                `;
+
+                const usernameEl = msg.querySelector('.username');
+                if (usernameEl && userColor) {
+                    usernameEl.style.color = userColor;
                 }
-                if (title) {
-                    title.style.fontFamily = '"MS Sans Serif", Tahoma, Geneva, sans-serif';
-                    title.style.fontSize = '11px';
-                    title.style.fontWeight = 'bold';
-                    title.style.color = '#ffffff';
-                    title.style.textShadow = 'none';
-                    title.style.textTransform = 'none';
-                    title.style.letterSpacing = '0px';
-                }
-                if (closeBtn) {
-                    closeBtn.style.fontFamily = '"MS Sans Serif", Tahoma, Geneva, sans-serif';
-                    closeBtn.style.fontSize = '9px';
-                    closeBtn.style.fontWeight = 'bold';
-                    closeBtn.style.width = '16px';
-                    closeBtn.style.height = '14px';
-                    closeBtn.style.backgroundColor = '#c0c0c0';
-                    closeBtn.style.color = '#000000';
-                    closeBtn.style.border = '1px solid';
-                    closeBtn.style.borderColor = '#ffffff #5a5a5a #5a5a5a #ffffff';
-                    closeBtn.style.display = 'flex';
-                    closeBtn.style.alignItems = 'center';
-                    closeBtn.style.justifyContent = 'center';
-                    closeBtn.style.padding = '0';
-                    closeBtn.style.margin = '0';
-                }
-                if (win95Body) {
-                    win95Body.style.backgroundColor = '#ffffff';
-                    win95Body.style.border = '2px solid';
-                    win95Body.style.borderColor = '#808080 #ffffff #ffffff #808080';
-                    win95Body.style.padding = '6px 8px';
-                    win95Body.style.color = '#000000';
-                    win95Body.style.display = 'flex';
-                    win95Body.style.alignItems = 'center';
-                    win95Body.style.gap = '8px';
-                }
-                if (pic) {
-                    pic.style.width = settings.chat.profilePicSize + 'px';
-                    pic.style.height = settings.chat.profilePicSize + 'px';
-                    pic.style.borderRadius = '0px';
-                    pic.style.border = '1px solid #808080';
-                    pic.style.flexShrink = '0';
-                    pic.style.objectFit = 'cover';
-                    pic.style.display = settings.chat.showProfilePics ? 'block' : 'none';
-                }
-                if (msgText) {
-                    msgText.style.fontFamily = '"MS Sans Serif", Tahoma, Geneva, sans-serif';
-                    msgText.style.color = '#000000';
-                    msgText.style.textShadow = 'none';
-                    msgText.style.fontSize = '12px';
-                    msgText.style.fontWeight = 'normal';
-                    msgText.style.fontStyle = 'normal';
-                    msgText.style.letterSpacing = '0px';
+                const nameEl = msg.querySelector('.username-text');
+                if (nameEl) {
+                    nameEl.setAttribute('aria-label', username);
                 }
             } else {
                 msg.classList.remove('theme-windows95');
+                msg.classList.remove('theme-powerline');
                 msg.innerHTML = `
                     <img class="profile-pic" src="${fallbackUrl}" alt="${username}" />
                     <div class="message-content">
@@ -429,72 +297,11 @@ const updatePreview = () => {
                     </div>
                 `;
 
-                // Set inline styles for Default (Modern Pillbox)
-                msg.style.backgroundColor = bgColorWithOpacity;
-                msg.style.borderRadius = settings.chat.pillboxRadius + 'px';
-                msg.style.padding = settings.chat.pillboxPadding;
-                msg.style.border = border;
-                msg.style.borderColor = '';
-                msg.style.display = 'flex';
-                msg.style.alignItems = 'center';
-                msg.style.gap = '10px';
-                msg.style.flexDirection = '';
-
-                const pic = msg.querySelector('.profile-pic');
-                if (pic) {
-                    pic.style.width = settings.chat.profilePicSize + 'px';
-                    pic.style.height = settings.chat.profilePicSize + 'px';
-                    pic.style.borderRadius = settings.chat.profilePicRadius + '%';
-                    pic.style.border = '';
-                    pic.style.flexShrink = '0';
-                    pic.style.objectFit = 'cover';
-                    pic.style.display = settings.chat.showProfilePics ? 'block' : 'none';
-                }
-
                 const usernameEl = msg.querySelector('.username');
                 if (usernameEl && userColor) {
                     usernameEl.style.color = userColor;
                 }
             }
-        });
-
-        const badges = chatPreview.querySelectorAll('.chat-badge');
-        badges.forEach(b => {
-            b.style.display = 'inline-block';
-            b.style.verticalAlign = 'middle';
-            b.style.height = '1em';
-            b.style.width = '1em';
-            b.style.marginRight = '0.2em';
-            b.style.borderRadius = '2px';
-        });
-
-        const badgeContainers = chatPreview.querySelectorAll('.badges-container');
-        badgeContainers.forEach(bc => {
-            bc.style.display = settings.chat.showBadges ? 'inline-flex' : 'none';
-            bc.style.alignItems = 'center';
-            bc.style.marginRight = '0.3em';
-        });
-
-        const usernames = chatPreview.querySelectorAll('.chat-message:not(.theme-windows95) .username');
-        usernames.forEach(u => {
-            u.style.fontFamily = settings.chat.userFontFamily;
-            u.style.fontSize = settings.chat.userFontSize + 'px';
-            u.style.fontWeight = settings.chat.userFontWeight;
-            u.style.fontStyle = settings.chat.userFontStyle;
-            u.style.textTransform = settings.chat.userTextTransform;
-            u.style.letterSpacing = settings.chat.userLetterSpacing + 'px';
-            u.style.textShadow = `${settings.chat.userShadowOffsetX || 1}px ${settings.chat.userShadowOffsetY || 1}px ${settings.chat.userShadowBlur}px ${settings.chat.userShadowColor}`;
-        });
-
-        const msgTexts = chatPreview.querySelectorAll('.chat-message:not(.theme-windows95) .message-text');
-        msgTexts.forEach(t => {
-            t.style.fontFamily = settings.chat.msgFontFamily;
-            t.style.color = settings.chat.msgColor;
-            t.style.fontSize = settings.chat.msgFontSize + 'px';
-            t.style.fontWeight = settings.chat.msgFontWeight;
-            t.style.fontStyle = settings.chat.msgFontStyle;
-            t.style.letterSpacing = settings.chat.msgLetterSpacing + 'px';
-            t.style.textShadow = `${settings.chat.msgShadowOffsetX || 1}px ${settings.chat.msgShadowOffsetY || 1}px ${settings.chat.msgShadowBlur}px ${settings.chat.msgShadowColor}`;
         });
     }
 };
@@ -539,13 +346,14 @@ const generateOBSUrl = (type = 'all') => {
         const jsonString = JSON.stringify(diffSettings);
         const encodedSettings = btoa(unescape(encodeURIComponent(jsonString)));
 
-        const currentPath = window.location.href;
-        const targetPath = currentPath.replace('settings.html', 'index.html');
-        let finalUrl = `${targetPath}?cfg=${encodedSettings}`;
-
+        const url = new URL(window.location.href);
+        url.pathname = url.pathname.replace('settings.html', 'index.html');
+        url.search = '';
+        url.searchParams.set('cfg', encodedSettings);
         if (type !== 'all') {
-            finalUrl += `&type=${type}`;
+            url.searchParams.set('type', type);
         }
+        const finalUrl = url.toString();
 
         const outputNode = document.getElementById('obsUrlOutput');
         if (outputNode) {
@@ -555,7 +363,7 @@ const generateOBSUrl = (type = 'all') => {
 
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(finalUrl).then(() => {
-                const btn = document.querySelector(`.action-btn[onclick*="'${type}'"]`);
+                const btn = document.querySelector(`.action-btn[data-action="generateOBSUrl"][data-type="${type}"]`);
                 if (btn) {
                     const originalText = btn.innerText;
                     btn.innerText = "Copied to Clipboard!";
@@ -585,7 +393,7 @@ const testChatMessage = () => {
     const testMsgs = ['PogChamp!', 'This overlay is fire!', 'How do I get this?', 'STRIX TOOLS FTW', 'Love the style!'];
     const randomName = TEST_NAMES[Math.floor(Math.random() * TEST_NAMES.length)];
     const randomMsg = testMsgs[Math.floor(Math.random() * testMsgs.length)];
-    const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+    const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
 
     const possibleBadges = ['subscriber', 'moderator', 'vip', 'broadcaster'];
     const numBadges = Math.floor(Math.random() * 3);
@@ -610,13 +418,7 @@ const testChatMessage = () => {
     chatPreview.appendChild(msgEl);
     updatePreview();
 
-    if (s.messageLifetimeMs > 0) {
-        setTimeout(() => {
-            msgEl.style.transition = 'opacity 0.5s';
-            msgEl.style.opacity = '0';
-            setTimeout(() => msgEl.remove(), 500);
-        }, s.messageLifetimeMs);
-    }
+    window.scheduleFadeOut(msgEl, s.messageLifetimeMs);
 
     while (chatPreview.children.length > s.maxMessages) {
         chatPreview.removeChild(chatPreview.firstChild);
@@ -655,14 +457,20 @@ const openTab = (tabId) => {
     const buttons = document.querySelectorAll('.tab-btn');
 
     contents.forEach(c => c.classList.remove('active'));
-    buttons.forEach(b => b.classList.remove('active'));
+    buttons.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+        b.setAttribute('tabindex', '-1');
+    });
 
     const targetTab = document.getElementById(tabId);
     if (targetTab) targetTab.classList.add('active');
 
     buttons.forEach(btn => {
-        if (btn.getAttribute('onclick')?.includes(tabId)) {
+        if (btn.dataset.tab === tabId) {
             btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+            btn.setAttribute('tabindex', '0');
         }
     });
 };
@@ -670,99 +478,82 @@ const openTab = (tabId) => {
 const resetToDefaults = () => {
     if (!confirm("Are you sure you want to reset all stylistic settings? Your Twitch credentials will be preserved.")) return;
 
-    const defaults = window.DEFAULT_SETTINGS;
-
-    const c = defaults.chat;
-    document.getElementById('chatTheme').value = c.theme;
-    document.getElementById('showBadges').checked = c.showBadges;
-    document.getElementById('showProfilePics').checked = c.showProfilePics;
-    document.getElementById('profilePicSize').value = c.profilePicSize;
-    document.getElementById('profilePicRadius').value = c.profilePicRadius;
-    document.getElementById('maxMessages').value = c.maxMessages;
-    document.getElementById('messageLifetime').value = c.messageLifetimeMs;
-    document.getElementById('pillboxBgColor').value = c.pillboxBgColor;
-    document.getElementById('pillboxOpacity').value = c.pillboxOpacity;
-    document.getElementById('pillboxRadius').value = c.pillboxRadius;
-    document.getElementById('pillboxPadding').value = c.pillboxPadding;
-    document.getElementById('messageGap').value = c.messageGap;
-    document.getElementById('userFontFamily').value = c.userFontFamily;
-    document.getElementById('userFontSize').value = c.userFontSize;
-    document.getElementById('userFontWeight').value = c.userFontWeight;
-    document.getElementById('userFontStyle').value = c.userFontStyle;
-    document.getElementById('userTextTransform').value = c.userTextTransform;
-    document.getElementById('userLetterSpacing').value = c.userLetterSpacing;
-    document.getElementById('userShadowColor').value = c.userShadowColor;
-    document.getElementById('userShadowBlur').value = c.userShadowBlur;
-    document.getElementById('userShadowOffsetX').value = c.userShadowOffsetX;
-    document.getElementById('userShadowOffsetY').value = c.userShadowOffsetY;
-    document.getElementById('msgFontFamily').value = c.msgFontFamily;
-    document.getElementById('msgColor').value = c.msgColor;
-    document.getElementById('msgFontSize').value = c.msgFontSize;
-    document.getElementById('msgFontWeight').value = c.msgFontWeight;
-    document.getElementById('msgFontStyle').value = c.msgFontStyle;
-    document.getElementById('msgLetterSpacing').value = c.msgLetterSpacing;
-    document.getElementById('msgShadowColor').value = c.msgShadowColor;
-    document.getElementById('msgShadowBlur').value = c.msgShadowBlur;
-    document.getElementById('msgShadowOffsetX').value = c.msgShadowOffsetX;
-    document.getElementById('msgShadowOffsetY').value = c.msgShadowOffsetY;
-    document.getElementById('chatBorderWidth').value = c.borderWidth;
-    document.getElementById('chatBorderStyle').value = c.borderStyle;
-    document.getElementById('chatBorderColor').value = c.borderColor;
-
-    const e = defaults.events;
-    document.getElementById('eventFontFamily').value = e.fontFamily;
-    document.getElementById('eventFontSize').value = e.fontSize;
-    document.getElementById('eventFontWeight').value = e.fontWeight;
-    document.getElementById('eventFontStyle').value = e.fontStyle;
-    document.getElementById('eventTextTransform').value = e.textTransform;
-    document.getElementById('eventTextDecoration').value = e.textDecoration;
-    document.getElementById('eventKerning').value = e.kerning;
-    document.getElementById('eventTextColor').value = e.textColor;
-    document.getElementById('eventLabelColor').value = e.labelColor;
-    document.getElementById('eventShadowColor').value = e.shadowColor;
-    document.getElementById('eventShadowX').value = e.shadowX;
-    document.getElementById('eventShadowY').value = e.shadowY;
-    document.getElementById('eventShadowBlur').value = e.shadowBlur;
-    document.getElementById('eventLayout').value = e.layout;
-    document.getElementById('eventSpacing').value = e.spacing;
-    document.getElementById('eventOrientation').value = e.orientation;
-    document.getElementById('eventLabelPosition').value = e.labelPosition;
-    document.getElementById('eventBgColor').value = e.bgColor;
-    document.getElementById('eventBgOpacity').value = e.bgOpacity;
-    document.getElementById('eventBorderRadius').value = e.borderRadius;
-    document.getElementById('eventBorderWidth').value = e.borderWidth;
-    document.getElementById('eventBorderStyle').value = e.borderStyle;
-    document.getElementById('eventBorderColor').value = e.borderColor;
-    document.getElementById('eventHighlightColor').value = e.highlightColor;
-    document.getElementById('eventHighlightDuration').value = e.highlightDurationMs;
-
+    applySettingsToDOM(window.DEFAULT_SETTINGS, window.DEFAULT_SETTINGS);
     updatePreview();
     saveToLocalStorage();
 };
 
-window.openTab = openTab;
-window.generateOBSUrl = generateOBSUrl;
-window.testChatMessage = testChatMessage;
-window.testEvent = testEvent;
-window.resetToDefaults = resetToDefaults;
-
 const initSettings = () => {
     loadFromLocalStorage();
+    const onInput = debounce(() => {
+        updatePreview();
+        saveToLocalStorage();
+    }, 100);
     document.querySelectorAll('input, select').forEach(el => {
-        el.addEventListener('input', () => {
-            updatePreview();
-            saveToLocalStorage();
-        });
-        el.addEventListener('change', () => {
-            updatePreview();
-            saveToLocalStorage();
-        });
+        if (el.id === 'chatTheme') return;
+        el.addEventListener('input', onInput);
     });
+    const chatThemeEl = document.getElementById('chatTheme');
+    if (chatThemeEl) {
+        chatThemeEl.addEventListener('input', function() {
+            syncAccentColor();
+            updatePreview();
+            saveToLocalStorage();
+        });
+    }
+
+    const tablist = document.querySelector('.tabs');
+    if (tablist) {
+        tablist.addEventListener('keydown', (e) => {
+            if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+            e.preventDefault();
+            const buttons = Array.from(tablist.querySelectorAll('.tab-btn'));
+            const currentIndex = buttons.findIndex(b => b.getAttribute('aria-selected') === 'true');
+            const dir = e.key === 'ArrowRight' ? 1 : -1;
+            const nextIndex = (currentIndex + dir + buttons.length) % buttons.length;
+            openTab(buttons[nextIndex].dataset.tab);
+            buttons[nextIndex].focus();
+        });
+    }
+    document.querySelectorAll('[data-tab]').forEach(btn => {
+        btn.addEventListener('click', () => openTab(btn.dataset.tab));
+    });
+    document.querySelectorAll('[data-action]').forEach(btn => {
+        const action = btn.dataset.action;
+        const type = btn.dataset.type;
+        if (action === 'generateOBSUrl') {
+            btn.addEventListener('click', () => generateOBSUrl(type));
+        } else if (action === 'testChatMessage') {
+            btn.addEventListener('click', testChatMessage);
+        } else if (action === 'testEvent') {
+            btn.addEventListener('click', testEvent);
+        } else if (action === 'resetToDefaults') {
+            btn.addEventListener('click', resetToDefaults);
+        }
+    });
+
+    syncAccentColor();
     updatePreview();
 };
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSettings);
-} else {
-    initSettings();
+window.getSettings = getSettings;
+window.syncAccentColor = syncAccentColor;
+window.saveToLocalStorage = saveToLocalStorage;
+window.loadFromLocalStorage = loadFromLocalStorage;
+window.updatePreview = updatePreview;
+window.validateInputs = validateInputs;
+window.getDiffSettings = getDiffSettings;
+window.generateOBSUrl = generateOBSUrl;
+window.testChatMessage = testChatMessage;
+window.testEvent = testEvent;
+window.openTab = openTab;
+window.resetToDefaults = resetToDefaults;
+window.initSettings = initSettings;
+
+if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSettings);
+    } else {
+        initSettings();
+    }
 }

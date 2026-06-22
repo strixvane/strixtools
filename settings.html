@@ -3,21 +3,23 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StrixTools - Settings</title>
     <link rel="stylesheet" href="styles/settings.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
     <div class="container">
         <h2>Overlay Settings</h2>
 
-        <div class="tabs">
-            <button class="tab-btn active" onclick="openTab('general')">General</button>
-            <button class="tab-btn" onclick="openTab('chat')">Chat</button>
-            <button class="tab-btn" onclick="openTab('events')">Events</button>
+        <div class="tabs" role="tablist">
+            <button type="button" class="tab-btn active" data-tab="general" role="tab" aria-selected="true" aria-controls="general" id="tab-general" tabindex="0">General</button>
+            <button type="button" class="tab-btn" data-tab="chat" role="tab" aria-selected="false" aria-controls="chat" id="tab-chat" tabindex="-1">Chat</button>
+            <button type="button" class="tab-btn" data-tab="events" role="tab" aria-selected="false" aria-controls="events" id="tab-events" tabindex="-1">Events</button>
         </div>
 
-        <div id="general" class="tab-content active">
+        <div id="general" class="tab-content active" role="tabpanel" aria-labelledby="tab-general">
             <fieldset>
                 <legend>Twitch Connection</legend>
                 <div class="form-group">
@@ -31,14 +33,14 @@
                 <div class="form-group">
                     <label for="accessToken">Access Token</label>
                     <input type="password" id="accessToken" placeholder="Paste your Access Token here">
-                    <p style="font-size: 11px; color: #888; margin-top: 5px;">
+                    <p class="helper-text">
                         Required: moderator:read:followers, channel:read:subscriptions, bits:read
                     </p>
                 </div>
             </fieldset>
         </div>
 
-        <div id="chat" class="tab-content">
+        <div id="chat" class="tab-content" role="tabpanel" aria-labelledby="tab-chat">
             <fieldset>
                 <legend>Chat Theme</legend>
                 <div class="form-row">
@@ -47,25 +49,31 @@
                         <select id="chatTheme">
                             <option value="default">Modern Pillbox</option>
                             <option value="windows95">Retro Windows 95</option>
+                            <option value="powerline">Powerline</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="chatAccentColor">Accent Color</label>
+                        <input type="color" id="chatAccentColor" value="#000000">
+                        <p class="helper-text">Used by theme-specific styles (glows, borders, highlights)</p>
                     </div>
                 </div>
             </fieldset>
             <fieldset>
                 <legend>Twitch Badges</legend>
                 <div class="form-row">
-                    <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="showBadges">
-                        <label for="showBadges" style="margin: 0; cursor: pointer;">Show User Badges</label>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="showBadges" checked>
+                        <label for="showBadges">Show User Badges</label>
                     </div>
                 </div>
             </fieldset>
             <fieldset>
                 <legend>Profile Pictures</legend>
                 <div class="form-row">
-                    <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
+                    <div class="form-group checkbox-group">
                         <input type="checkbox" id="showProfilePics">
-                        <label for="showProfilePics" style="margin: 0; cursor: pointer;">Show Profile Pictures</label>
+                        <label for="showProfilePics">Show Profile Pictures</label>
                     </div>
                 </div>
                 <div class="form-row">
@@ -145,7 +153,7 @@
             <fieldset>
                 <legend>Username Styling</legend>
                 <div class="form-row">
-                    <div class="form-group" style="flex: 2;">
+                    <div class="form-group flex-2">
                         <label for="userFontFamily">Font Family</label>
                         <input type="text" id="userFontFamily"
                             value="system-ui, -apple-system, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
@@ -210,7 +218,7 @@
             <fieldset>
                 <legend>Message Text Styling</legend>
                 <div class="form-row">
-                    <div class="form-group" style="flex: 2;">
+                    <div class="form-group flex-2">
                         <label for="msgFontFamily">Font Family</label>
                         <input type="text" id="msgFontFamily"
                             value="system-ui, -apple-system, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
@@ -270,11 +278,11 @@
             </fieldset>
         </div>
 
-        <div id="events" class="tab-content">
+        <div id="events" class="tab-content" role="tabpanel" aria-labelledby="tab-events">
             <fieldset>
                 <legend>Typography & Transform</legend>
                 <div class="form-row">
-                    <div class="form-group" style="flex: 2;">
+                    <div class="form-group flex-2">
                         <label for="eventFontFamily">Font Family</label>
                         <input type="text" id="eventFontFamily"
                             value="system-ui, -apple-system, 'Montserrat', 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
@@ -357,6 +365,12 @@
                     <div class="form-group">
                         <label for="eventBorderColor">Border Color</label>
                         <input type="color" id="eventBorderColor" value="#ffffff">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventPadding">Padding</label>
+                        <input type="text" id="eventPadding" value="5px 10px">
                     </div>
                 </div>
             </fieldset>
@@ -445,55 +459,42 @@
 
         <fieldset>
             <legend>Generate & Copy OBS URLs</legend>
-            <div class="form-row" style="margin-bottom: 10px;">
-                <button class="action-btn" onclick="generateOBSUrl('chat')"
-                    style="flex: 1; margin-top: 0; font-size: 12px; padding: 10px;">Chat Only</button>
-                <button class="action-btn" onclick="generateOBSUrl('follow')"
-                    style="flex: 1; margin-top: 0; font-size: 12px; padding: 10px;">Follow Only</button>
+            <div class="form-row">
+                <button type="button" class="action-btn btn-compact" data-action="generateOBSUrl" data-type="chat">Chat Only</button>
+                <button type="button" class="action-btn btn-compact" data-action="generateOBSUrl" data-type="follow">Follow Only</button>
             </div>
             <div class="form-row">
-                <button class="action-btn" onclick="generateOBSUrl('sub')"
-                    style="flex: 1; margin-top: 0; font-size: 12px; padding: 10px;">Sub Only</button>
-                <button class="action-btn" onclick="generateOBSUrl('cheer')"
-                    style="flex: 1; margin-top: 0; font-size: 12px; padding: 10px;">Cheer Only</button>
+                <button type="button" class="action-btn btn-compact" data-action="generateOBSUrl" data-type="sub">Sub Only</button>
+                <button type="button" class="action-btn btn-compact" data-action="generateOBSUrl" data-type="cheer">Cheer Only</button>
             </div>
-            <button class="action-btn" onclick="generateOBSUrl('all')" style="margin-top: 10px;">All-in-One
+            <button type="button" class="action-btn mt-10" data-action="generateOBSUrl" data-type="all">All-in-One
                 Overlay</button>
 
-            <button class="action-btn" onclick="resetToDefaults()"
-                style="margin-top: 15px; background-color: #444; color: #ccc; font-size: 11px;">Reset Styles to
+            <button type="button" class="btn-reset" data-action="resetToDefaults">Reset Styles to
                 Default</button>
 
-            <div id="security-warning"
-                style="margin-top: 15px; padding: 10px; background-color: #442200; border: 1px solid #ff9900; border-radius: 4px; color: #ffcc00; font-size: 12px; line-height: 1.4;">
+            <div id="security-warning">
                 <strong>⚠️ SECURITY WARNING:</strong> The generated URL contains your private Twitch Access Token.
                 <strong>DO NOT</strong> show this URL on stream or share it with others.
             </div>
         </fieldset>
 
-        <div class="form-group" style="margin-top: 15px;">
+        <div class="form-group mt-15">
             <label for="obsUrlOutput">Your Custom OBS URL</label>
-            <input type="text" id="obsUrlOutput" readonly
-                style="background-color: #000; color: #ff9900; border-color: #ff9900; text-align: center;"
-                placeholder="URL will appear here...">
+            <input type="text" id="obsUrlOutput" readonly placeholder="URL will appear here...">
         </div>
     </div>
 
     <div class="preview-container">
-        <h3
-            style="margin-top: 0; color: #FFF; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center;">
+        <h3>
             Live Preview
-            <div style="display: flex; gap: 5px;">
-                <button onclick="testChatMessage()"
-                    style="font-size: 10px; padding: 2px 5px; cursor: pointer; background: #333; color: #fff; border: 1px solid #555;">Test
-                    Chat</button>
-                <button onclick="testEvent()"
-                    style="font-size: 10px; padding: 2px 5px; cursor: pointer; background: #333; color: #fff; border: 1px solid #555;">Test
-                    Event</button>
+            <div class="test-btns">
+                <button type="button" class="btn-sm" data-action="testChatMessage">Test Chat</button>
+                <button type="button" class="btn-sm" data-action="testEvent">Test Event</button>
             </div>
         </h3>
-        <div id="preview-box" style="display: flex; flex-direction: column; height: 100%;">
-            <div id="events-preview" style="margin-bottom: 20px;">
+        <div id="preview-box">
+            <div id="events-preview">
                 <div class="event-container" id="preview-follow">
                     <span class="label">Latest Follower:</span> <span class="value">OwlishGeorge</span>
                 </div>
@@ -518,6 +519,8 @@
     </div>
 
     <script src="js/config.js" defer></script>
+    <script src="js/styles.js" defer></script>
+    <script src="js/modules/chat.js" defer></script>
     <script src="js/settings.js" defer></script>
 </body>
 

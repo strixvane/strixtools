@@ -6,7 +6,14 @@ class EventsModule {
         this.ws = null;
         this.reconnectAttempts = 0;
         this.maxReconnectDelay = 30000;
+        this.maxReconnectAttempts = 10;
         this.highlights = new Map();
+        this.subscriptionIds = [];
+        this.reconnectTimer = null;
+        this.keepaliveTimer = null;
+        window.addEventListener('beforeunload', () => {
+            this.unsubscribeAll();
+        });
     }
 
     async init() {
@@ -19,89 +26,14 @@ class EventsModule {
             this.connect();
         } catch (err) {
             console.error("Events module failed to initialize:", err);
+            window.statusManager?.show('Auth failed. Verify Client ID & Token in settings.', 'error');
         }
     }
 
     applyStyles() {
-        const root = document.documentElement;
-        const s = this.config;
-        
-        const hexToRgba = (hex, opacityPercentage) => {
-            if (!hex || hex === 'transparent') return 'transparent';
-            if (hex.length < 7) return 'rgba(0,0,0,0)';
-            let r = parseInt(hex.slice(1, 3), 16),
-                g = parseInt(hex.slice(3, 5), 16),
-                b = parseInt(hex.slice(5, 7), 16),
-                a = opacityPercentage / 100;
-            return `rgba(${r}, ${g}, ${b}, ${a})`;
-        };
-
-        const bgColor = hexToRgba(s.bgColor, s.bgOpacity);
-        const border = s.borderWidth > 0 ? `${s.borderWidth}px ${s.borderStyle} ${s.borderColor}` : 'none';
-
-        root.style.setProperty('--event-font-family', s.fontFamily);
-        root.style.setProperty('--event-font-size', s.fontSize + 'px');
-        root.style.setProperty('--event-font-weight', s.fontWeight);
-        root.style.setProperty('--event-font-style', s.fontStyle);
-        root.style.setProperty('--event-text-decoration', s.textDecoration);
-        root.style.setProperty('--event-text-transform', s.textTransform || 'none');
-        root.style.setProperty('--event-kerning', s.kerning + 'px');
-        root.style.setProperty('--event-text-color', s.textColor);
-        root.style.setProperty('--event-label-color', s.labelColor);
-        root.style.setProperty('--event-text-shadow', `${s.shadowX}px ${s.shadowY}px ${s.shadowBlur}px ${s.shadowColor}`);
-        root.style.setProperty('--event-padding', typeof s.padding === 'number' ? s.padding + 'px' : (s.padding || '5px 10px'));
-        root.style.setProperty('--event-bg-color', bgColor);
-        root.style.setProperty('--event-border', border);
-        root.style.setProperty('--event-border-radius', s.borderRadius + 'px');
-        root.style.setProperty('--event-highlight-color', s.highlightColor);
-
-        const style = document.createElement('style');
-        style.id = 'events-dynamic-styles';
-        
-        const layoutCss = s.layout === 'horizontal' 
-            ? `#events-container { display: flex; flex-direction: row; gap: ${s.spacing}px; }`
-            : `#events-container { display: block; } .event-container { margin: ${s.spacing}px 0; }`;
-
-        const orientationCss = s.orientation === 'stacked'
-            ? `.event-container { display: flex; flex-direction: column; align-items: flex-start; }`
-            : `.event-container { display: flex; flex-direction: row; align-items: center; gap: 8px; }`;
-
-        const labelPosCss = s.labelPosition === 'after'
-            ? `.event-container { flex-direction: ${s.orientation === 'stacked' ? 'column-reverse' : 'row-reverse'}; }`
-            : '';
-
-        style.innerHTML = `
-            ${layoutCss}
-            ${orientationCss}
-            ${labelPosCss}
-            .event-container {
-                padding: var(--event-padding);
-                background-color: var(--event-bg-color);
-                border: var(--event-border);
-                border-radius: var(--event-border-radius);
-                transition: color 0.3s ease;
-            }
-            .event-container .value, .event-container .label {
-                font-family: var(--event-font-family);
-                font-size: var(--event-font-size);
-                font-weight: var(--event-font-weight);
-                font-style: var(--event-font-style);
-                text-decoration: var(--event-text-decoration);
-                text-transform: var(--event-text-transform);
-                letter-spacing: var(--event-kerning);
-                text-shadow: var(--event-text-shadow);
-            }
-            .event-container .label { color: var(--event-label-color); }
-            .event-container .value { color: var(--event-text-color); }
-            
-            .highlight-active .value {
-                color: var(--event-highlight-color) !important;
-            }
-        `;
-
-        const existing = document.getElementById('events-dynamic-styles');
-        if (existing) existing.remove();
-        document.head.appendChild(style);
+        window.setEventCSSVariables(document.documentElement, this.config);
+        const css = window.buildEventCSS(this.config, '#events-container');
+        window.injectStyles('events-dynamic-styles', css);
     }
 
     async fetchInitialData() {
@@ -140,24 +72,40 @@ class EventsModule {
         } catch (err) { console.error("Sub fetch error:", err); }
     }
 
-    connect() {
-        console.log("Connecting to Twitch EventSub WebSocket...");
-        this.ws = new WebSocket("wss://eventsub.wss.twitch.tv/ws");
+    connect(reconnectUrl) {
+        if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
+            return;
+        }
+        const url = reconnectUrl || "wss://eventsub.wss.twitch.tv/ws";
+        window.statusManager?.show('Connecting to Twitch...', 'loading');
+        console.log(`Connecting to Twitch EventSub WebSocket${reconnectUrl ? ' (reconnect URL)' : ''}...`);
+        this.ws = new WebSocket(url);
 
         this.ws.onopen = () => {
             console.log("WebSocket connection opened.");
             this.reconnectAttempts = 0;
+            window.statusManager?.show('Connected', 'success', 3000);
         };
 
         this.ws.onmessage = async (event) => {
-            const message = JSON.parse(event.data);
-            const messageType = message.metadata.message_type;
+            try {
+                const message = JSON.parse(event.data);
+                const messageType = message.metadata.message_type;
 
-            if (messageType === "session_welcome") {
-                console.log("WebSocket session welcome. Subscribing to events...");
-                this.subscribeToEvents(message.payload.session.id);
-            } else if (messageType === "notification") {
-                this.handleNotification(message.payload);
+                if (messageType === "session_welcome") {
+                    console.log("WebSocket session welcome. Subscribing to events...");
+                    await this.subscribeToEvents(message.payload.session.id);
+                } else if (messageType === "session_reconnect") {
+                    console.log("WebSocket session reconnect requested by Twitch.");
+                    this.ws.close();
+                    this.connect(message.payload.session.reconnect_url);
+                } else if (messageType === "notification") {
+                    this.handleNotification(message.payload);
+                } else if (messageType === "session_keepalive") {
+                    // keepalive received, connection is healthy
+                }
+            } catch (err) {
+                console.error("Failed to parse WebSocket message:", err);
             }
         };
 
@@ -173,15 +121,39 @@ class EventsModule {
     }
 
     handleReconnect() {
+        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+            console.error("Max reconnect attempts reached. Stopping reconnection.");
+            window.statusManager?.show('Connection failed. Check network & Twitch status.', 'error');
+            return;
+        }
+        window.statusManager?.show('Connection lost. Reconnecting...', 'warning');
         const delay = Math.min(Math.pow(2, this.reconnectAttempts) * 1000, this.maxReconnectDelay);
         console.log(`Attempting reconnect in ${delay / 1000}s...`);
-        setTimeout(() => {
+        if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+        this.reconnectTimer = setTimeout(() => {
+            this.reconnectTimer = null;
             this.reconnectAttempts++;
             this.connect();
         }, delay);
     }
 
+    async unsubscribeAll() {
+        for (const id of this.subscriptionIds) {
+            try {
+                await fetch(`https://api.twitch.tv/helix/eventsub/subscriptions?id=${id}`, {
+                    method: "DELETE",
+                    headers: this.twitchClient.getHeaders()
+                });
+            } catch (err) {
+                console.error("Failed to unsubscribe:", err);
+            }
+        }
+        this.subscriptionIds = [];
+    }
+
     async subscribeToEvents(sessionId) {
+        await this.unsubscribeAll();
+
         const events = [
             { type: "channel.follow", version: "2", condition: { broadcaster_user_id: this.userId, moderator_user_id: this.userId } },
             { type: "channel.subscribe", version: "1", condition: { broadcaster_user_id: this.userId } },
@@ -204,6 +176,10 @@ class EventsModule {
                     const err = await res.json();
                     console.error(`Subscription failed for ${sub.type}:`, err);
                 } else {
+                    const data = await res.json();
+                    if (data.data && data.data.length > 0 && data.data[0].id) {
+                        this.subscriptionIds.push(data.data[0].id);
+                    }
                     console.log(`Subscribed to ${sub.type}`);
                 }
             } catch (err) {
