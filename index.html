@@ -6,11 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StrixTools Overlay</title>
     <link rel="stylesheet" href="styles/overlay.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
     <div id="overlay-root">
-        <div id="events-container">
+        <div id="events-container" aria-live="polite">
             <div class="event-container" id="latest-follow">
                 <span class="label">Latest Follower:</span> <span class="value">-</span>
             </div>
@@ -22,10 +23,14 @@
             </div>
         </div>
 
-        <div id="chat-container"></div>
+        <div id="chat-container" aria-live="polite"></div>
+
+        <div id="status-bar" role="status" aria-live="polite"></div>
     </div>
 
     <script src="js/config.js" defer></script>
+    <script src="js/status.js" defer></script>
+    <script src="js/styles.js" defer></script>
     <script src="js/modules/twitch.js" defer></script>
     <script src="js/modules/chat.js" defer></script>
     <script src="js/modules/events.js" defer></script>
@@ -125,15 +130,16 @@
                     const decodedString = decodeURIComponent(atob(encodedConfig));
                     const customSettings = JSON.parse(decodedString);
 
-                    // Deep merge helper
                     const merge = (target, source) => {
+                        const result = { ...target };
                         for (const key in source) {
-                            if (source[key] instanceof Object && key in target) {
-                                Object.assign(source[key], merge(target[key], source[key]));
+                            if (source[key] instanceof Object && key in target && target[key] instanceof Object) {
+                                result[key] = merge(target[key], source[key]);
+                            } else {
+                                result[key] = source[key];
                             }
                         }
-                        Object.assign(target || {}, source);
-                        return target;
+                        return result;
                     };
 
                     settings = merge({ ...settings }, customSettings);

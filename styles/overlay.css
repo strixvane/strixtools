@@ -16,7 +16,7 @@ body {
 
 :root {
     --event-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    --event-font-size: 24px;
+    --event-font-size: 20px;
     --event-font-weight: 800;
     --event-font-style: normal;
     --event-text-decoration: none;
@@ -41,4 +41,47 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.chat-message.fade-out {
+    animation: fadeOut 0.5s ease forwards;
+}
+
+#status-bar {
+    position: fixed;
+    bottom: 8px;
+    left: 8px;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #ccc;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    pointer-events: none;
+    z-index: 9999;
+    display: none;
+    line-height: 1.4;
+    max-width: 60vw;
+}
+
+#status-bar.status-loading {
+    color: #aaa;
+}
+
+#status-bar.status-success {
+    color: #6f6;
+}
+
+#status-bar.status-warning {
+    color: #ff9800;
+}
+
+#status-bar.status-error {
+    color: #f66;
+    background: rgba(0, 0, 0, 0.85);
 }

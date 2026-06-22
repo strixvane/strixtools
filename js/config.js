@@ -37,6 +37,7 @@ const DEFAULT_SETTINGS = {
         msgShadowBlur: 2,
         msgShadowOffsetX: 1,
         msgShadowOffsetY: 1,
+        accentColor: '#000000',
         borderWidth: 0,
         borderStyle: 'solid',
         borderColor: '#ffffff'
@@ -60,7 +61,7 @@ const DEFAULT_SETTINGS = {
         padding: '5px 10px',
         orientation: 'horizontal',
         labelPosition: 'before',
-        bgColor: 'transparent',
+        bgColor: '#000000',
         bgOpacity: 0,
         borderRadius: 0,
         borderWidth: 0,
@@ -98,6 +99,31 @@ const MOCK_BADGES = {
     }
 };
 
+function hexToRgba(hex, opacityPercentage) {
+    if (!hex || hex === 'transparent') return 'transparent';
+    if (hex.length < 7) return 'rgba(0,0,0,1)';
+    const r = parseInt(hex.slice(1, 3), 16),
+        g = parseInt(hex.slice(3, 5), 16),
+        b = parseInt(hex.slice(5, 7), 16),
+        a = opacityPercentage / 100;
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
+function scheduleFadeOut(element, lifetimeMs) {
+    if (lifetimeMs <= 0) return;
+    setTimeout(() => {
+        element.style.transition = 'opacity 0.5s';
+        element.style.opacity = '0';
+        setTimeout(() => {
+            if (element.parentNode) {
+                element.parentNode.removeChild(element);
+            }
+        }, 500);
+    }, lifetimeMs);
+}
+
+window.hexToRgba = hexToRgba;
+window.scheduleFadeOut = scheduleFadeOut;
 window.DEFAULT_SETTINGS = DEFAULT_SETTINGS;
 window.MOCK_BADGES = MOCK_BADGES;
 

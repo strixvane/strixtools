@@ -2,6 +2,15 @@
 
 A summary of all the new features and fixes added in this update.
 
+## [2.5.0] - 2026-06-22
+- **Added Tests:** Big backend overhaul that is the biggest portion of this update. Not something that will be felt up front, but is going to make it a LOT easier for me long term to maintain this project. (Big thanks to Herb for the help on getting used to TDD!)
+- **New Powerline inspired theme:** Added 'Powerline' theme inspired by conversations between myself and Onihiko_VT. Also added customizable accents as part of this update!
+- **Various Bugfixes:** Lost track at some point, but squashed a lot of bugs identified by adding tests.
+- **Screen Reader Support:** Not super needed on this app, but someone pointed out that it's not too difficult to add and some people do need.
+
+### Upcoming Plans
+- Next big update will be another backend one to make deploying new versions easier for me, still working on it. Will likely include more themes!
+
 ## [2.4.0] - 2026-06-15
 
 ### Retro Windows 95 Theme
